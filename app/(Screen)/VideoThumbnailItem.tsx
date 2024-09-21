@@ -1,12 +1,23 @@
-import { View, Text, Image } from 'react-native'
+import { View, Text, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import Colors from '../Utils/Colors'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 
 export default function VideoThumbnailItem({ video }: any) {
+    const router = useRouter();
+
+    const handlePress = () => {
+        router.push({
+            pathname: '/PlayVideoList',
+            params: { video: JSON.stringify(video) }
+        });
+    };
+
     return (
-        <View style={{ margin: 5, flex: 1 }}>
+        <TouchableOpacity style={{ margin: 5, flex: 1 }} onPress={handlePress}>
             <View style={{
+
                 position: 'absolute', zIndex: 10, bottom: 0, padding: 5,
                 display: 'flex',
                 flexDirection: 'row',
@@ -28,7 +39,7 @@ export default function VideoThumbnailItem({ video }: any) {
                 </View>
             </View>
             <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 250, borderRadius: 10 }} />
-        </View>
+        </TouchableOpacity>
 
     )
 }

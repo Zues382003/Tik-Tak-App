@@ -1,14 +1,15 @@
 import { View, Text, Image, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useUser } from '@clerk/clerk-expo';
-import { supabase } from '../Utils/SupabaseConfig';
-import VideoThumbnailItem from '../(Screen)/VideoThumbnailItem';
+import { supabase } from '../../Utils/SupabaseConfig';
+import VideoThumbnailItem from '../../(Screen)/VideoThumbnailItem';
 
 export default function HomeScreen() {
     const { user } = useUser();
     const [videoList, setVideoList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [loadCount, setLoadCount] = useState(0);
+
 
     useEffect(() => {
         user && updateProfileImage();

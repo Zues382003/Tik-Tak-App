@@ -6,7 +6,7 @@ export default function TabLayout() {
     return (
         <Tabs>
             <Tabs.Screen
-                name="index"
+                name="(homeNav)"
                 options={{
                     title: 'Home',
                     headerShown: false,
