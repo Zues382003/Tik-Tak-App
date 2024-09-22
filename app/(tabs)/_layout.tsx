@@ -1,10 +1,15 @@
 import React from 'react';
-import { Tabs, Stack } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
     return (
-        <Tabs>
+        <Tabs
+            screenOptions={({ route }) => ({
+                tabBarActiveTintColor: 'black',
+                tabBarInactiveTintColor: 'gray',
+            })}
+        >
             <Tabs.Screen
                 name="(homeNav)"
                 options={{
