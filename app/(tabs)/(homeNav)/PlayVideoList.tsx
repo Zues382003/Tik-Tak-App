@@ -1,7 +1,9 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import PlayVideoItem from '../../(Screen)/PlayVideoItem';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
 
 // At the top of your file, define an interface for your video item
 interface VideoItem {
@@ -48,6 +50,11 @@ export default function PlayVideoList() {
 
     return (
         <View style={{ flex: 1 }}>
+            <TouchableOpacity
+                style={{ position: 'absolute', top: 0, left: 0, zIndex: 100, margin: 15 }}
+                onPress={() => router.back()}>
+                <Ionicons name="arrow-back-sharp" size={28} color="black" />
+            </TouchableOpacity>
             <FlatList
                 style={{ flex: 1 }}
                 data={videoList}

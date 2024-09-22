@@ -38,7 +38,7 @@ export default function VideoThumbnailItem({ video }: any) {
                     <Ionicons name="heart-outline" size={24} color="white" />
                 </View>
             </View>
-            <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 250, borderRadius: 10 }} />
+            <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 240, borderRadius: 10 }} />
         </TouchableOpacity>
 
     )
