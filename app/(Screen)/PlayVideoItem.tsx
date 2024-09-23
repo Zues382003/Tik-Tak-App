@@ -1,4 +1,4 @@
-import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableHighlight } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableHighlight, TouchableOpacity } from 'react-native'
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { ResizeMode, Video } from 'expo-av';
 import Colors from '../Utils/Colors';
@@ -53,7 +53,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
 
     const handleLike = useCallback(() => {
         setLocalIsLiked(prevIsLiked => !prevIsLiked);
-        userLikeHandler(video, localIsLiked);
+        userLikeHandler(video, localIsLiked as boolean);
     }, [video, localIsLiked, userLikeHandler]);
 
     return (
@@ -76,18 +76,18 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
                         <Text style={[styles.description, styles.textShadow]}>{video.description}</Text>
                     </View>
                     <View style={styles.actions}>
-                        <TouchableHighlight onPress={handleLike} style={styles.actionButton}>
+                        <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
                             {localIsLiked ?
-                                <AntDesign name="heart" size={40} color="white" style={styles.icon} /> :
-                                <Ionicons name="heart-outline" size={40} color="white" style={styles.icon} />
+                                <AntDesign name="heart" size={38} color="white" style={styles.icon} /> :
+                                <Ionicons name="heart-outline" size={38} color="white" style={styles.icon} />
                             }
-                        </TouchableHighlight>
-                        <TouchableHighlight style={styles.actionButton}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionButton}>
                             <Ionicons name="chatbubble-outline" size={35} color="white" style={styles.icon} />
-                        </TouchableHighlight>
-                        <TouchableHighlight style={styles.actionButton}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionButton}>
                             <Ionicons name="paper-plane-outline" size={35} color="white" style={styles.icon} />
-                        </TouchableHighlight>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 <Video

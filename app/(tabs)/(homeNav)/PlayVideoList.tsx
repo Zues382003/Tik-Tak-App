@@ -36,26 +36,44 @@ export default function PlayVideoList() {
     const flatListRef = useRef<FlatList>(null);
 
     const userLikeHandler = useCallback(async (video: VideoItem, isLiked: boolean) => {
-        if (!user || isLiked) return;
+        if (!user) return;
 
         try {
-            const { data, error } = await supabase
-                .from('VideoLikes')
-                .insert({
-                    postIdRef: video.id,
-                    userEmail: user.primaryEmailAddress?.emailAddress
-                })
-                .select();
+            if (!isLiked) {
+                const { data, error } = await supabase
+                    .from('VideoLikes')
+                    .insert({
+                        postIdRef: video.id,
+                        userEmail: user.primaryEmailAddress?.emailAddress
+                    })
+                    .select();
 
-            if (error) throw error;
+                if (error) throw error;
 
-            setVideoList(prevList =>
-                prevList.map(item =>
-                    item.id === video.id
-                        ? { ...item, VideoLikes: [...(item.VideoLikes || []), data[0]] }
-                        : item
-                )
-            );
+                setVideoList(prevList =>
+                    prevList.map(item =>
+                        item.id === video.id
+                            ? { ...item, VideoLikes: [...(item.VideoLikes || []), data[0]] }
+                            : item
+                    )
+                );
+            } else {
+                const { data, error } = await supabase
+                    .from('VideoLikes')
+                    .delete()
+                    .eq('postIdRef', video.id)
+                    .eq('userEmail', user.primaryEmailAddress?.emailAddress);
+
+                if (error) throw error;
+
+                setVideoList(prevList =>
+                    prevList.map(item =>
+                        item.id === video.id
+                            ? { ...item, VideoLikes: item.VideoLikes?.filter(like => like.postIdRef !== video.id) }
+                            : item
+                    )
+                );
+            }
         } catch (e) {
             console.error("Exception occurred while liking video:", e);
         }
@@ -153,12 +171,13 @@ export default function PlayVideoList() {
                 onPress={() => router.back()}>
                 <Ionicons name="arrow-back-sharp" size={28} color="white" />
             </TouchableOpacity>
-            {isLoading ? (
-                <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                    <Text>Đang tải video...</Text>
-                </View>
-            ) : memoizedFlatList}
+            {isLoading
+                ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                        <Text>Đang tải video...</Text>
+                    </View>
+                ) : memoizedFlatList}
         </View>
     )
 }
@@ -181,7 +200,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: 0,
+        top: 10,
         left: 0,
         zIndex: 100,
         margin: 15,

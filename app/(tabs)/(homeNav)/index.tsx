@@ -62,7 +62,7 @@ export default function HomeScreen() {
 
 
     return (
-        <View style={{ padding: 5, paddingTop: 20, flex: 1 }}>
+        <View style={{ padding: 5, paddingTop: 30, flex: 1 }}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10, marginBottom: 10 }}>
                 <Text style={{ fontSize: 30, fontFamily: 'Outfit-Bold' }}>Tik Tak</Text>
                 <Image source={{ uri: user?.imageUrl }} style={{ width: 50, height: 50, borderRadius: 99 }}></Image>
