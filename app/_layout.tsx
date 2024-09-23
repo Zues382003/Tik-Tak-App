@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from "react";
 import { useFonts } from 'expo-font';
 import LoginScreen from "./(Screen)/LoginScreen";
+import { View } from "react-native";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
 
@@ -70,7 +71,7 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoaded>
           <SignedIn>
@@ -81,6 +82,6 @@ export default function RootLayout() {
           </SignedOut>
         </ClerkLoaded>
       </ClerkProvider>
-    </SafeAreaView>
+    </View>
   );
 }

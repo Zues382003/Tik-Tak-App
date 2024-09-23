@@ -1,13 +1,18 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { router, useLocalSearchParams } from 'expo-router';
 import PlayVideoItem from '../../(Screen)/PlayVideoItem';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet } from 'react-native';
 import { supabase } from '@/app/Utils/SupabaseConfig';
+import { useUser } from '@clerk/clerk-expo';
 
-// At the top of your file, define an interface for your video item
-interface VideoItem {
+export interface VideoLike {
+    postIdRef: number;
+    userEmail: string;
+}
+
+export interface VideoItem {
     Users: {
         name: string;
         profileImage: string;
@@ -19,105 +24,143 @@ interface VideoItem {
     id: number;
     thumbnail: string;
     videoUrl: string;
+    VideoLikes?: VideoLike[];
 }
 
 export default function PlayVideoList() {
-
     const params = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState(true);
-
-    // Update your state declaration
+    const { user } = useUser();
     const [videoList, setVideoList] = useState<VideoItem[]>([]);
-    const [currentVideoIndex, setCurrentVideoIndex] = useState();
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+    const flatListRef = useRef<FlatList>(null);
 
+    const userLikeHandler = useCallback(async (video: VideoItem, isLiked: boolean) => {
+        if (!user || isLiked) return;
 
-    useEffect(() => {
-        if (params) {
-            const parsedVideo = JSON.parse(params.video as string);
-            if (Array.isArray(parsedVideo)) {
-                setVideoList(parsedVideo as VideoItem[]);
-                console.log("Received video:", parsedVideo);
-                console.log("videoList length:", parsedVideo.length);
-            } else if (typeof parsedVideo === 'object' && parsedVideo !== null) {
-                const videoArray = [parsedVideo as VideoItem];
-                setVideoList(videoArray);
-                console.log("Received video:", videoArray);
-                console.log("videoList length:", videoArray.length);
-            } else {
-                console.log("Received data is not a valid video object");
-            }
+        try {
+            const { data, error } = await supabase
+                .from('VideoLikes')
+                .insert({
+                    postIdRef: video.id,
+                    userEmail: user.primaryEmailAddress?.emailAddress
+                })
+                .select();
+
+            if (error) throw error;
+
+            setVideoList(prevList =>
+                prevList.map(item =>
+                    item.id === video.id
+                        ? { ...item, VideoLikes: [...(item.VideoLikes || []), data[0]] }
+                        : item
+                )
+            );
+        } catch (e) {
+            console.error("Exception occurred while liking video:", e);
         }
-        getLastesPosts();
-    }, []);
+    }, [user]);
 
-    const getLastesPosts = async () => {
+    const getLastesPosts = useCallback(async (selectedVideoId?: number) => {
         setIsLoading(true);
         try {
             const { data, error } = await supabase
                 .from('PostList')
-                .select('*, Users(username, name, profileImage)')
-                .range(0, 7)
+                .select('*, Users(username, name, profileImage),VideoLikes(postIdRef, userEmail)')
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                console.error("Error fetching data:", error);
-                return;
-            }
+            if (error) throw error;
 
-            console.log("Data video", data);
-            if (data === null || data.length === 0) {
-                console.log("No data returned from the query");
+            if (selectedVideoId) {
+                const selectedVideo = data.find(video => video.id === selectedVideoId);
+                const otherVideos = data.filter(video => video.id !== selectedVideoId);
+                setVideoList(selectedVideo ? [selectedVideo, ...otherVideos] : data);
             } else {
-                setVideoList(videoList => [...videoList, ...data] as any);
+                setVideoList(data || []);
             }
-            setIsLoading(false);
-
         } catch (e) {
             console.error("Exception occurred:", e);
+        } finally {
+            setIsLoading(false);
         }
-    }
+    }, []);
 
+    useEffect(() => {
+        if (params.video) {
+            const parsedVideo = JSON.parse(params.video as string);
+            console.log("Parsed video:", parsedVideo);
+            if (Array.isArray(parsedVideo)) {
+                setVideoList(parsedVideo);
+                getLastesPosts();
+            } else {
+                setVideoList([parsedVideo]);
+                getLastesPosts(parsedVideo.id);
+            }
+        } else {
+            getLastesPosts();
+        }
+    }, [params.video, getLastesPosts]);
+
+    useEffect(() => {
+        console.log("Updated videoList:", videoList);
+    }, [videoList]);
+
+    const renderItem = useCallback(({ item, index }: { item: VideoItem; index: number }) => {
+        console.log("Rendering video item:", item);
+        return (
+            <PlayVideoItem
+                style={{ flex: 1, width: '100%', height: '100%' }}
+                video={item}
+                activeIndex={currentVideoIndex}
+                index={index}
+                userLikeHandler={userLikeHandler}
+                isLoading={isLoading}
+                user={user}
+            />
+        );
+    }, [currentVideoIndex, userLikeHandler, isLoading, user]);
+
+    const keyExtractor = useCallback((item: VideoItem) => item.id.toString(), []);
+
+    const memoizedFlatList = useMemo(() => (
+        <FlatList
+            ref={flatListRef}
+            style={{ flex: 1, width: '100%', height: '100%' }}
+            data={videoList}
+            pagingEnabled
+            horizontal
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            initialScrollIndex={0}
+            onScrollToIndexFailed={info => {
+                const wait = new Promise(resolve => setTimeout(resolve, 500));
+                wait.then(() => {
+                    flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                });
+            }}
+            onScroll={e => {
+                const contentOffsetX = e.nativeEvent.contentOffset.x;
+                const index = Math.round(contentOffsetX / e.nativeEvent.layoutMeasurement.width);
+                setCurrentVideoIndex(index);
+            }}
+        />
+    ), [videoList, keyExtractor, renderItem]);
 
     return (
         <View style={{ flex: 1 }}>
             <TouchableOpacity
-                style={[
-                    {
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        zIndex: 100,
-                        margin: 15,
-                        padding: 5,
-                        borderRadius: 20,
-                    },
-                    styles.iconShadow
-                ]}
+                style={[styles.backButton, styles.iconShadow]}
                 onPress={() => router.back()}>
                 <Ionicons name="arrow-back-sharp" size={28} color="white" />
             </TouchableOpacity>
-            <FlatList
-                style={{ flex: 1 }}
-                data={videoList}
-                pagingEnabled
-                keyExtractor={(item, index) => index.toString()}
-                horizontal
-                onScroll={e => {
-                    const contentOffsetX = e.nativeEvent.contentOffset.x;
-                    const index = Math.round(contentOffsetX / e.nativeEvent.layoutMeasurement.width);
-                    setCurrentVideoIndex(index);
-                }}
-                renderItem={({ item, index }) => (
-                    <PlayVideoItem style={{ flex: 1 }}
-                        video={item} key={index}
-                        activeIndex={currentVideoIndex}
-                        index={index} />
-                )}
-            />
+            {isLoading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                    <Text>Đang tải video...</Text>
+                </View>
+            ) : memoizedFlatList}
         </View>
     )
-
-
 }
 
 const styles = StyleSheet.create({
@@ -130,5 +173,19 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 100,
+        margin: 15,
+        padding: 5,
+        borderRadius: 20,
     },
 });
