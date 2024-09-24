@@ -57,7 +57,7 @@ export default function AddScreen() {
 
             // Navigate to PreviewScreen in the add tab
             router.push({
-                pathname: '/(tabs)/(addNav)/preview',
+                pathname: '/(tabs)/(addNav)/Preview',
                 params: {
                     thumbnailUri: uri
                 }

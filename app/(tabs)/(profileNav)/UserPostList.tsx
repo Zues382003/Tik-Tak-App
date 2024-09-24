@@ -1,10 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function SearchScreen() {
+const UserPostList = () => {
     return (
         <View>
-            <Text>SearchScreen</Text>
+            <Text>userPostList</Text>
         </View>
     )
 }
+
+export default UserPostList

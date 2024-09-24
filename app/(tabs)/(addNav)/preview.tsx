@@ -128,7 +128,7 @@ export default function PreviewScreen() {
 
     return (
         <KeyboardAvoidingView style={{ backgroundColor: Colors.WHITE, flex: 1 }}>
-            <ScrollView style={{ margin: 10 }}>
+            <ScrollView style={{ marginLeft: 10, marginRight: 10, marginTop: 30 }}>
                 <TouchableOpacity
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                     onPress={() => router.back()}

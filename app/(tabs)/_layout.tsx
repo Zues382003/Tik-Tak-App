@@ -19,7 +19,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="search"
+                name="(searchNav)"
                 options={{
                     title: 'Search',
                     headerShown: false,
@@ -35,7 +35,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="profile"
+                name="(profileNav)"
                 options={{
                     title: 'Profile',
                     headerShown: false,
