@@ -35,10 +35,12 @@ export default function PlayVideoList() {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
+
     const userLikeHandler = useCallback(async (video: VideoItem, isLiked: boolean) => {
         if (!user) return;
 
         try {
+            let updatedVideo = { ...video };
             if (!isLiked) {
                 const { data, error } = await supabase
                     .from('VideoLikes')
@@ -50,15 +52,9 @@ export default function PlayVideoList() {
 
                 if (error) throw error;
 
-                setVideoList(prevList =>
-                    prevList.map(item =>
-                        item.id === video.id
-                            ? { ...item, VideoLikes: [...(item.VideoLikes || []), data[0]] }
-                            : item
-                    )
-                );
+                updatedVideo.VideoLikes = [...(video.VideoLikes || []), data[0]];
             } else {
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from('VideoLikes')
                     .delete()
                     .eq('postIdRef', video.id)
@@ -66,16 +62,19 @@ export default function PlayVideoList() {
 
                 if (error) throw error;
 
-                setVideoList(prevList =>
-                    prevList.map(item =>
-                        item.id === video.id
-                            ? { ...item, VideoLikes: item.VideoLikes?.filter(like => like.postIdRef !== video.id) }
-                            : item
-                    )
-                );
+                updatedVideo.VideoLikes = video.VideoLikes?.filter(like => like.userEmail !== user.primaryEmailAddress?.emailAddress);
             }
+
+            setVideoList(prevList =>
+                prevList.map(item =>
+                    item.id === video.id ? updatedVideo : item
+                )
+            );
+
+            return updatedVideo;
         } catch (e) {
             console.error("Exception occurred while liking video:", e);
+            return null;
         }
     }, [user]);
 

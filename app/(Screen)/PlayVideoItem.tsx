@@ -22,6 +22,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
     const videoRef = useRef(null);
     const [status, setStatus] = useState({});
     const [isMuted, setIsMuted] = useState(true);
+    const [likeCount, setLikeCount] = useState(video.VideoLikes?.length);
 
     const isUserAlreadyLiked = useMemo(() => {
         const result = video.VideoLikes?.some((item: any) => item.userEmail === user?.primaryEmailAddress?.emailAddress);
@@ -31,15 +32,26 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
 
     const [localIsLiked, setLocalIsLiked] = useState(isUserAlreadyLiked);
 
+    const [localVideo, setLocalVideo] = useState(video);
+
+    useEffect(() => {
+        setLocalVideo(video);
+    }, [video]);
+
     useEffect(() => {
         setLocalIsLiked(isUserAlreadyLiked);
     }, [isUserAlreadyLiked]);
+
+    useEffect(() => {
+        setLikeCount(video.VideoLikes?.length);
+    }, [video.VideoLikes]);
 
     useEffect(() => {
         if ((status as any).isLoaded) {
             setIsMuted(!(status as any).isPlaying);
         }
     }, [status]);
+
 
     useEffect(() => {
         if (videoRef.current) {
@@ -51,10 +63,15 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
         }
     }, [isFocused, activeIndex, index]);
 
-    const handleLike = useCallback(() => {
-        setLocalIsLiked(prevIsLiked => !prevIsLiked);
-        userLikeHandler(video, localIsLiked as boolean);
-    }, [video, localIsLiked, userLikeHandler]);
+
+    const handleLike = useCallback(async () => {
+        const newIsLiked = !localIsLiked;
+        setLocalIsLiked(newIsLiked);
+        const updatedVideo = await userLikeHandler(localVideo, localIsLiked as boolean);
+        if (updatedVideo as any) {
+            setLocalVideo(updatedVideo as any);
+        }
+    }, [localVideo, localIsLiked, userLikeHandler]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -76,12 +93,15 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
                         <Text style={[styles.description, styles.textShadow]}>{video.description}</Text>
                     </View>
                     <View style={styles.actions}>
-                        <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
-                            {localIsLiked ?
-                                <AntDesign name="heart" size={38} color="white" style={styles.icon} /> :
-                                <Ionicons name="heart-outline" size={38} color="white" style={styles.icon} />
-                            }
-                        </TouchableOpacity>
+                        <View style={styles.likeCountContainer}>
+                            <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
+                                {localIsLiked ?
+                                    <AntDesign name="heart" size={38} color="white" style={styles.icon} /> :
+                                    <Ionicons name="heart-outline" size={38} color="white" style={styles.icon} />
+                                }
+                            </TouchableOpacity>
+                            <Text style={styles.likeCount}>{localVideo.VideoLikes?.length}</Text>
+                        </View>
                         <TouchableOpacity style={styles.actionButton}>
                             <Ionicons name="chatbubble-outline" size={35} color="white" style={styles.icon} />
                         </TouchableOpacity>
@@ -111,7 +131,7 @@ export default React.memo(PlayVideoItem, (prevProps, nextProps) => {
         prevProps.activeIndex === nextProps.activeIndex &&
         prevProps.index === nextProps.index &&
         prevProps.isLoading === nextProps.isLoading &&
-        prevProps.user?.id === nextProps.user?.id;
+        prevProps.user?.id === nextProps.user?.id
 });
 
 const styles = StyleSheet.create({
@@ -141,7 +161,7 @@ const styles = StyleSheet.create({
     },
     icon: {
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
-        textShadowOffset: { width: -1, height: 1 },
+        textShadowOffset: { width: -0.5, height: 0.5 },
         textShadowRadius: 10
     },
     avatarShadow: {
@@ -199,8 +219,20 @@ const styles = StyleSheet.create({
     actions: {
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: 5,
     },
     actionButton: {
         marginBottom: 15,
+    },
+    likeCount: {
+        color: Colors.WHITE,
+        fontSize: 16,
+        fontFamily: 'Outfit-Regular',
+        marginBottom: 10,
+    },
+    likeCountContainer: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: -5,
     },
 });

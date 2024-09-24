@@ -1,4 +1,4 @@
-import { View, Text, Image, FlatList } from 'react-native'
+import { View, Text, Image, FlatList, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useUser } from '@clerk/clerk-expo';
 import { supabase } from '../../Utils/SupabaseConfig';
@@ -10,6 +10,10 @@ export default function HomeScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [loadCount, setLoadCount] = useState(0);
 
+    interface Post {
+        id: string; // or number, depending on your data structure
+        // ... other properties
+    }
 
     useEffect(() => {
         user && updateProfileImage();
@@ -38,8 +42,8 @@ export default function HomeScreen() {
         try {
             const { data, error } = await supabase
                 .from('PostList')
-                .select('*, Users(username, name, profileImage)')
-                .range(loadCount, loadCount + 7)
+                .select('*, Users(username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
+                .range(loadCount, loadCount + 5)
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -51,7 +55,13 @@ export default function HomeScreen() {
             if (data === null || data.length === 0) {
                 console.log("No data returned from the query");
             } else {
-                setVideoList(videoList => [...videoList, ...data] as any);
+                // Lọc ra các bài post trong data mà không có trong videoList
+                const newUniqueData = (data as Post[]).filter(newPost =>
+                    !(videoList as Post[]).some(existingPost => existingPost.id === newPost.id)
+                );
+
+                // Cập nhật videoList với các bài post mới và duy nhất
+                setVideoList(videoList => [...videoList, ...newUniqueData] as any);
             }
             setIsLoading(false);
 
@@ -60,6 +70,18 @@ export default function HomeScreen() {
         }
     }
 
+    const screenWidth = Dimensions.get('window').width;
+    const itemWidth = (screenWidth - 30) / 2; // 30 là tổng padding
+
+    const renderItem = ({ item, index }: { item: any, index: any }) => {
+        if (item === null) {
+            // Render một view trống cho item "dummy"
+            return <View style={{ width: itemWidth, margin: 5 }} />;
+        }
+        return <VideoThumbnailItem video={item} index={index} width={itemWidth} />;
+    };
+
+    const keyExtractor = (item: { id: number } | null, index: number) => item ? item.id.toString() : `dummy-${index}`;
 
     return (
         <View style={{ padding: 5, paddingTop: 30, flex: 1 }}>
@@ -71,12 +93,13 @@ export default function HomeScreen() {
             <View style={{ flex: 1 }}>
                 <FlatList
                     style={{ display: 'flex', flex: 1 }}
+                    data={videoList.length % 2 === 0 ? videoList : [...videoList, null]}
+                    renderItem={renderItem}
+                    keyExtractor={keyExtractor}
                     numColumns={2}
-                    data={videoList}
                     onRefresh={() => getLastesPosts()}
                     refreshing={isLoading}
-                    onEndReached={() => setLoadCount(loadCount + 7)}
-                    renderItem={({ item, index }) => (<VideoThumbnailItem video={item} index={index} />)}
+                    onEndReached={() => setLoadCount(loadCount + 5)}
                 />
 
             </View>

@@ -1,7 +1,8 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Colors from '../Utils/Colors'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 
 export default function VideoThumbnailItem({ video }: any) {
@@ -13,6 +14,10 @@ export default function VideoThumbnailItem({ video }: any) {
             params: { video: JSON.stringify(video) }
         });
     };
+
+    useEffect(() => {
+        console.log("Users", video?.Users);
+    }, [video]);
 
     return (
         <TouchableOpacity style={{ margin: 5, flex: 1 }} onPress={handlePress}>
@@ -30,15 +35,16 @@ export default function VideoThumbnailItem({ video }: any) {
                 borderBottomRightRadius: 10,
             }}>
                 <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                    <Image source={{ uri: video?.Users?.profileImageUrl }} style={{ width: 20, height: 20, borderRadius: 99, backgroundColor: Colors.WHITE }} />
+                    <Image source={{ uri: video?.Users?.profileImage }} style={{ width: 20, height: 20, borderRadius: 99 }} />
                     <Text style={{ color: Colors.WHITE, fontFamily: 'Outfit-Regular', fontSize: 12 }}>{video?.Users?.name}</Text>
                 </View>
                 <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                    <Text style={{ color: Colors.WHITE, fontFamily: 'Outfit-Regular', fontSize: 12 }}>36</Text>
-                    <Ionicons name="heart-outline" size={24} color="white" />
+                    <Text style={{ color: Colors.WHITE, fontFamily: 'Outfit-Regular', fontSize: 12 }}>{video?.VideoLikes?.length}</Text>
+                    {video?.VideoLikes?.length > 0 ? <Ionicons name="heart" size={24} color="white" /> :
+                        <Ionicons name="heart-outline" size={24} color="white" />}
                 </View>
             </View>
-            <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 240, borderRadius: 10 }} />
+            <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 260, borderRadius: 10 }} />
         </TouchableOpacity>
 
     )
