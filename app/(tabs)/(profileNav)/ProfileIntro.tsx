@@ -81,4 +81,4 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
     )
 }
 
-export default ProfileIntro
+export default ProfileIntro;

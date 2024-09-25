@@ -76,12 +76,12 @@ export default function HomeScreen() {
     const renderItem = ({ item, index }: { item: any, index: any }) => {
         if (item === null) {
             // Render một view trống cho item "dummy"
-            return <View style={{ width: itemWidth, margin: 5 }} />;
+            return <View style={{ width: itemWidth, margin: 5 }} />
         }
-        return <VideoThumbnailItem video={item} index={index} width={itemWidth} />;
+        return <VideoThumbnailItem video={item} isDisplayTrashIcon={false} index={index} width={itemWidth} />
     };
 
-    const keyExtractor = (item: { id: number } | null, index: number) => item ? item.id.toString() : `dummy-${index}`;
+    const keyExtractor = (item: { id: number } | null, index: number) => item ? item.id.toString() : `dummy-${index}`
 
     return (
         <View style={{ padding: 5, paddingTop: 30, flex: 1 }}>
@@ -97,11 +97,15 @@ export default function HomeScreen() {
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
                     numColumns={2}
-                    onRefresh={() => getLastesPosts()}
+                    onRefresh={() => {
+                        setVideoList([]);
+                        setLoadCount(0);
+                        getLastesPosts();
+                    }}
                     refreshing={isLoading}
                     onEndReached={() => setLoadCount(loadCount + 5)}
+                    onEndReachedThreshold={0.2}
                 />
-
             </View>
         </View>
     )
