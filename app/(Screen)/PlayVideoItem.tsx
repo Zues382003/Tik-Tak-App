@@ -6,6 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useIsFocused } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { VideoItem } from '../(tabs)/(homeNav)/PlayVideoList';
+import { router } from 'expo-router';
 
 interface PlayVideoItemProps {
     video: VideoItem;
@@ -52,6 +53,14 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
         }
     }, [status]);
 
+    const onOtherUserProfile = () => {
+        router.push({
+            pathname: '/otherUserProfile', // Corrected pathname
+            params: {
+                video: JSON.stringify(video) // Convert video object to a JSON string
+            }
+        })
+    }
 
     useEffect(() => {
         if (videoRef.current) {
@@ -84,10 +93,12 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
                 <View style={styles.overlay}>
                     <View style={styles.mainContent}>
                         <View style={styles.userInfo}>
-                            <Image
-                                source={{ uri: video.Users.profileImage }}
-                                style={[styles.avatar, styles.avatarShadow]}
-                            />
+                            <TouchableOpacity onPress={onOtherUserProfile}>
+                                <Image
+                                    source={{ uri: video.Users.profileImage }}
+                                    style={[styles.avatar, styles.avatarShadow]}
+                                />
+                            </TouchableOpacity>
                             <Text style={[styles.username, styles.textShadow]}>{video.Users.name}</Text>
                         </View>
                         <Text style={[styles.description, styles.textShadow]}>{video.description}</Text>

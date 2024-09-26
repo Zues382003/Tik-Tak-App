@@ -83,7 +83,7 @@ export default function PlayVideoList() {
         try {
             const { data, error } = await supabase
                 .from('PostList')
-                .select('*, Users(username, name, profileImage),VideoLikes(postIdRef, userEmail)')
+                .select('*, Users(username, name, profileImage, email),VideoLikes(postIdRef, userEmail)')
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
