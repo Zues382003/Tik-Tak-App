@@ -7,17 +7,21 @@ import { useIsFocused } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { VideoItem } from '../(tabs)/(homeNav)/PlayVideoList';
 import { router } from 'expo-router';
+import { supabase } from '../Utils/SupabaseConfig';
 
 interface PlayVideoItemProps {
     video: VideoItem;
     activeIndex: number;
     index: number;
     userLikeHandler: (video: VideoItem, isLiked: boolean) => void;
+    userFollowHandler: (userId: number, isFollowing: boolean) => void;
+    isFollowing: boolean;
+    isOwnVideo: boolean;
     user: any;
     isLoading: boolean;
 }
 
-function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoading }: PlayVideoItemProps) {
+function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowHandler, isFollowing, isOwnVideo, user, isLoading }: PlayVideoItemProps) {
     const { width: windowWidth } = useWindowDimensions();
     const isFocused = useIsFocused();
     const videoRef = useRef(null);
@@ -34,6 +38,8 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
     const [localIsLiked, setLocalIsLiked] = useState(isUserAlreadyLiked);
 
     const [localVideo, setLocalVideo] = useState(video);
+
+    const [localIsFollowing, setLocalIsFollowing] = useState(isFollowing);
 
     useEffect(() => {
         setLocalVideo(video);
@@ -82,6 +88,24 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
         }
     }, [localVideo, localIsLiked, userLikeHandler]);
 
+    const handleFollow = useCallback(async () => {
+        if (isOwnVideo) return; // Don't allow following own video
+        try {
+            await userFollowHandler(video.Users.id, localIsFollowing);
+            setLocalIsFollowing(!localIsFollowing);
+        } catch (error) {
+            console.error('Failed to update follow status:', error);
+        }
+    }, [video.Users.id, localIsFollowing, userFollowHandler, isOwnVideo]);
+
+    useEffect(() => {
+        setLocalIsFollowing(isFollowing);
+    }, [isFollowing]);
+
+    const showFollowButton = useMemo(() => {
+        return user?.primaryEmailAddress?.emailAddress !== video.emailRef;
+    }, [user?.primaryEmailAddress?.emailAddress, video.emailRef]);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={[styles.container, { width: windowWidth }]}>
@@ -99,6 +123,16 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
                                     style={[styles.avatar, styles.avatarShadow]}
                                 />
                             </TouchableOpacity>
+                            {showFollowButton && (
+                                <TouchableOpacity onPress={handleFollow}>
+                                    <AntDesign
+                                        name={localIsFollowing ? "checkcircle" : "pluscircle"}
+                                        style={styles.plusIcon}
+                                        size={18}
+                                        color={localIsFollowing ? "green" : Colors.BLACK}
+                                    />
+                                </TouchableOpacity>
+                            )}
                             <Text style={[styles.username, styles.textShadow]}>{video.Users.name}</Text>
                         </View>
                         <Text style={[styles.description, styles.textShadow]}>{video.description}</Text>
@@ -107,17 +141,17 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, user, isLoa
                         <View style={styles.likeCountContainer}>
                             <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
                                 {localIsLiked ?
-                                    <AntDesign name="heart" size={38} color="white" style={styles.icon} /> :
-                                    <Ionicons name="heart-outline" size={38} color="white" style={styles.icon} />
+                                    <AntDesign name="heart" size={40} color={Colors.WHITE} style={styles.icon} /> :
+                                    <AntDesign name="hearto" size={40} color={Colors.WHITE} style={styles.icon} />
                                 }
                             </TouchableOpacity>
                             <Text style={styles.likeCount}>{localVideo.VideoLikes?.length}</Text>
                         </View>
                         <TouchableOpacity style={styles.actionButton}>
-                            <Ionicons name="chatbubble-outline" size={35} color="white" style={styles.icon} />
+                            <Ionicons name="chatbubble-outline" size={35} color={Colors.WHITE} style={styles.icon} />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.actionButton}>
-                            <Ionicons name="paper-plane-outline" size={35} color="white" style={styles.icon} />
+                            <Ionicons name="paper-plane-outline" size={35} color={Colors.WHITE} style={styles.icon} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -171,9 +205,10 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     icon: {
+        textShadowRadius: 10,
+        paddingVertical: 5,
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
-        textShadowOffset: { width: -0.5, height: 0.5 },
-        textShadowRadius: 10
+        textShadowOffset: { width: -1, height: 1 },
     },
     avatarShadow: {
         shadowColor: "#000",
@@ -211,15 +246,17 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         marginRight: 10,
+        borderWidth: 2,
+        borderColor: Colors.WHITE,
     },
     username: {
         color: Colors.WHITE,
-        fontSize: 16,
-        fontFamily: 'Outfit-Regular',
+        fontSize: 18,
+        fontFamily: 'Outfit-Medium',
     },
     description: {
         color: Colors.WHITE,
@@ -234,16 +271,38 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         marginBottom: 15,
+        justifyContent: 'center', // Căn giữa icon theo chiều dọc
+        alignItems: 'center', // Căn giữa icon theo chiều ngang
     },
     likeCount: {
         color: Colors.WHITE,
-        fontSize: 16,
-        fontFamily: 'Outfit-Regular',
-        marginBottom: 10,
+        fontSize: 18,
+        fontWeight: 'bold',
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: -1, height: 1 },
+        textShadowRadius: 5,
+        paddingBottom: 10,
+        marginTop: -15,
     },
     likeCountContainer: {
         flexDirection: 'column',
         alignItems: 'center',
         marginBottom: -5,
+    },
+    plusIcon: {
+        position: 'absolute',
+        bottom: -26,
+        right: 10,
+        backgroundColor: Colors.WHITE,
+        borderRadius: 99,
+        padding: 2,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });

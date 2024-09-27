@@ -21,7 +21,7 @@ const OtherUserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPos
             // Render một view trống cho item "dummy"
             return <View style={{ width: itemWidth, margin: 5 }} />
         }
-        return <VideoThumbnailItem video={item} isDisplayTrashIcon={true} OnProfileRefresh={getLastesPosts} index={index} width={itemWidth} />
+        return <VideoThumbnailItem video={item} isDisplayTrashIcon={false} OnProfileRefresh={getLastesPosts} index={index} width={itemWidth} />
     }
     const keyExtractor = (item: { id: number } | null, index: number) => item ? item.id.toString() : `dummy-${index}`;
 

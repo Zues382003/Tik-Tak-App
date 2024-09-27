@@ -148,6 +148,7 @@ export default function PlayVideoList() {
             const { data, error } = await supabase
                 .from('PostList')
                 .select('*, Users(id,username, name, profileImage, email),VideoLikes(postIdRef, userEmail)')
+                .eq('emailRef', user?.primaryEmailAddress?.emailAddress)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
