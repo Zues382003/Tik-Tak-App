@@ -7,6 +7,8 @@ import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
+import { firebase } from '../../../Config/ConfigFireBase';
+
 
 export default function PreviewScreen() {
     const [videoUri, setVideoUri] = useState('');
@@ -82,40 +84,82 @@ export default function PreviewScreen() {
         }
     }
 
+    // const uploadFile = async (fileUri: string, resourceType: 'image' | 'video') => {
+    //     try {
+    //         const fileInfo = await FileSystem.getInfoAsync(fileUri);
+    //         if (!fileInfo.exists) {
+    //             throw new Error(`File does not exist: ${fileUri}`);
+    //         }
+
+    //         const timestamp = new Date().getTime();
+    //         const fileName = `${resourceType}-${timestamp}${resourceType === 'image' ? '.jpg' : '.mp4'}`;
+
+    //         const formData = new FormData();
+    //         formData.append('file', {
+    //             uri: fileUri,
+    //             type: resourceType === 'image' ? 'image/jpeg' : 'video/mp4',
+    //             name: fileName,
+    //         } as any);
+    //         formData.append('upload_preset', uploadPreset);
+
+    //         const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
+    //             method: 'POST',
+    //             body: formData,
+    //             headers: {
+    //                 'Content-Type': 'multipart/form-data',
+    //             },
+    //         });
+
+    //         if (!response.ok) {
+    //             const errorText = await response.text();
+    //             throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    //         }
+
+    //         const data = await response.json();
+    //         return data.secure_url;
+    //     } catch (error) {
+    //         console.error('Upload error:', error);
+    //         if (error instanceof Error) {
+    //             Alert.alert('Upload Error', error.message);
+    //         } else {
+    //             Alert.alert('Upload Error', 'An unknown error occurred');
+    //         }
+    //         throw error;
+    //     }
+    // }
+
     const uploadFile = async (fileUri: string, resourceType: 'image' | 'video') => {
         try {
             const fileInfo = await FileSystem.getInfoAsync(fileUri);
             if (!fileInfo.exists) {
                 throw new Error(`File does not exist: ${fileUri}`);
             }
+            const blob = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.onload = () => {
+                    resolve(xhr.response);
+                }
+                xhr.onerror = (e) => {
+                    reject(new TypeError('Network request failed'));
+                };
+                xhr.responseType = 'blob';
+                xhr.open('Get', fileUri, true);
+                xhr.send(null);
+            })
 
             const timestamp = new Date().getTime();
             const fileName = `${resourceType}-${timestamp}${resourceType === 'image' ? '.jpg' : '.mp4'}`;
 
-            const formData = new FormData();
-            formData.append('file', {
-                uri: fileUri,
-                type: resourceType === 'image' ? 'image/jpeg' : 'video/mp4',
-                name: fileName,
-            } as any);
-            formData.append('upload_preset', uploadPreset);
+            const ref = firebase.storage().ref().child(fileName);
 
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await ref.put(blob as any);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
 
-            const data = await response.json();
-            return data.secure_url;
-        } catch (error) {
+            // Lấy URL tải xuống
+            const downloadURL = await ref.getDownloadURL();
+            return downloadURL; // Trả về URL tải xuống
+        }
+        catch (error) {
             console.error('Upload error:', error);
             if (error instanceof Error) {
                 Alert.alert('Upload Error', error.message);

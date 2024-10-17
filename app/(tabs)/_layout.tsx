@@ -19,11 +19,11 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="(searchNav)"
+                name="(notificationNav)"
                 options={{
-                    title: 'Search',
+                    title: 'Notification',
                     headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="notifications-sharp" size={size} color={color} />,
                 }}
             />
             <Tabs.Screen

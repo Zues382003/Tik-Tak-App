@@ -6,13 +6,18 @@ import VideoThumbnailItem from '../../(Screen)/VideoThumbnailItem';
 
 export default function HomeScreen() {
     const { user } = useUser();
-    const [videoList, setVideoList] = useState([]);
+    const [videoList, setVideoList] = useState<PostVideo[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [loadCount, setLoadCount] = useState(0);
 
-    interface Post {
-        id: string; // or number, depending on your data structure
-        // ... other properties
+
+    interface PostVideo {
+        id: number; // Sử dụng number cho id
+        videoUrl: string; // Định dạng chuỗi cho videoUrl
+        thumbnail: string; // Định dạng chuỗi cho thumbnail
+        description: string; // Định dạng chuỗi cho description
+        emailRef: string; // Định dạng chuỗi cho emailRef
+        created_at: Date; // Sử dụng Date cho created_at
     }
 
     useEffect(() => {
@@ -22,19 +27,53 @@ export default function HomeScreen() {
 
     useEffect(() => {
         getLastesPosts();
-    }, [loadCount]);
+        // Thiết lập subscription cho realtime
+        const subscription = supabase
+            .channel('postlist-channel') // Tạo kênh cho danh sách video
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'PostList' }, (payload) => {
+                // Khi có video mới, cập nhật danh sách video
+                setVideoList(prevVideos => [...prevVideos, payload.new as PostVideo]); // Ensure payload.new has all required fields
+            })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'PostList' }, (payload) => {
+                // Khi có video được cập nhật, thay thế video cũ bằng video mới
+                setVideoList(prevVideos =>
+                    prevVideos.map(video =>
+                        video.id === payload.new.id ? { ...video, ...payload.new } : video // Merge existing video with new data
+                    ) as PostVideo[] // Cast the entire array to PostVideo[]
+                )
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'PostList' }, (payload) => {
+                // Khi có video bị xóa, cập nhật danh sách video
+                setVideoList(prevVideos => prevVideos.filter(video => video.id !== payload.old.id));
+            })
+            .subscribe();
+
+        // Dọn dẹp subscription khi component unmount
+        return () => {
+            supabase.removeChannel(subscription);
+        };
+    }, [user]); // Chạy lại khi user thay đổi
 
     const updateProfileImage = async () => {
+        if (!user?.primaryEmailAddress?.emailAddress || !user?.imageUrl) {
+            console.log("User email or image URL is not available.");
+            return; // Không thực hiện cập nhật nếu không có email hoặc imageUrl
+        }
 
         const { data, error } = await supabase
             .from('Users')
             .update({
-                'profileImage': user?.imageUrl,
+                'profileImage': user.imageUrl,
             })
-            .eq('email', user?.primaryEmailAddress?.emailAddress)
-            .is('profileImage', 'null')
+            .eq('email', user.primaryEmailAddress.emailAddress)
+            .is('profileImage', null) // Sử dụng null thay vì 'null'
             .select();
-        console.log(data);
+
+        if (error) {
+            console.error("Error updating profile image:", error);
+        } else {
+            console.log("Profile image updated successfully:", data);
+        }
     }
 
     const getLastesPosts = async () => {
@@ -56,8 +95,8 @@ export default function HomeScreen() {
                 console.log("No data returned from the query");
             } else {
                 // Lọc ra các bài post trong data mà không có trong videoList
-                const newUniqueData = (data as Post[]).filter(newPost =>
-                    !(videoList as Post[]).some(existingPost => existingPost.id === newPost.id)
+                const newUniqueData = (data as PostVideo[]).filter(newPost =>
+                    !(videoList as PostVideo[]).some(existingPost => existingPost.id === newPost.id)
                 );
 
                 // Cập nhật videoList với các bài post mới và duy nhất
@@ -88,7 +127,6 @@ export default function HomeScreen() {
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10, marginBottom: 10 }}>
                 <Text style={{ fontSize: 30, fontFamily: 'Outfit-Bold' }}>Tik Tak</Text>
                 <Image source={{ uri: user?.imageUrl }} style={{ width: 50, height: 50, borderRadius: 99 }}></Image>
-
             </View>
             <View style={{ flex: 1 }}>
                 <FlatList
