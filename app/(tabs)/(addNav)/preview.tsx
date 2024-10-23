@@ -17,8 +17,8 @@ export default function PreviewScreen() {
     const [description, setDescription] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-    const cloudName = 'dp8hznqy4';
-    const uploadPreset = 'ml_default';
+    // const cloudName = 'dp8hznqy4';
+    // const uploadPreset = 'ml_default';
     const { user } = useUser();
 
     useEffect(() => {

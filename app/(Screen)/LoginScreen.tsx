@@ -3,7 +3,6 @@ import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { ResizeMode, Video } from 'expo-av';
 import Colors from '../Utils/Colors';
 import { useOAuth } from '@clerk/clerk-expo';
-import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
 import { useRouter } from 'expo-router';
@@ -34,7 +33,7 @@ export default function LoginScreen() {
     const onPressGoogle = useCallback(async () => {
         try {
             const { createdSessionId, setActive } = await startGoogleOAuthFlow({
-                redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
+                // redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
             });
 
             if (createdSessionId) {
@@ -49,7 +48,7 @@ export default function LoginScreen() {
     const onPressFacebook = useCallback(async () => {
         try {
             const { createdSessionId, setActive } = await startFacebookOAuthFlow({
-                redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
+                // redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
             });
 
             if (createdSessionId) {
@@ -66,7 +65,7 @@ export default function LoginScreen() {
             // Delay navigation
             setTimeout(() => {
                 router.replace('/(tabs)');
-            }, 100);
+            }, 2000);
         }
     }, [sessionId, router, isMounted]);
 

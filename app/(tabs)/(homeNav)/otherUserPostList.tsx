@@ -1,5 +1,5 @@
-import { View, Text, FlatList, StyleSheet, Dimensions } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, FlatList, StyleSheet, Dimensions } from 'react-native'
+import React from 'react'
 import VideoThumbnailItem from '@/app/(Screen)/VideoThumbnailItem';
 
 // Định nghĩa kiểu props

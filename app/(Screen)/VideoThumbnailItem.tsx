@@ -2,8 +2,6 @@ import { View, Text, Image, TouchableOpacity, Alert } from 'react-native'
 import React, { useEffect } from 'react'
 import Colors from '../Utils/Colors'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AntDesign from '@expo/vector-icons/AntDesign';
-
 import { useRouter } from 'expo-router';
 import { supabase } from '../Utils/SupabaseConfig';
 

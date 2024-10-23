@@ -1,6 +1,6 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import OtherUserProfileIntro from './otherUserProfileIntro';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import OtherUserPostList from './otherUserPostList';

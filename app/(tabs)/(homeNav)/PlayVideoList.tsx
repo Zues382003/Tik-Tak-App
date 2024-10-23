@@ -34,6 +34,7 @@ export interface VideoItem {
     VideoLikes?: VideoLike[];
 }
 
+
 export default function PlayVideoList() {
     const params = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState(true);
@@ -192,7 +193,6 @@ export default function PlayVideoList() {
 
         return (
             <PlayVideoItem
-                style={{ flex: 1, width: '100%', height: '100%' }}
                 video={item}
                 activeIndex={currentVideoIndex}
                 index={index}

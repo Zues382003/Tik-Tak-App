@@ -1,4 +1,4 @@
-import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableOpacity, FlatList, Share, TouchableWithoutFeedback, Dimensions } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableOpacity, FlatList, Modal, TextInput, TouchableWithoutFeedback } from 'react-native'
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { ResizeMode, Video } from 'expo-av';
 import Colors from '../Utils/Colors';
@@ -8,7 +8,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { VideoItem } from '../(tabs)/(homeNav)/PlayVideoList';
 import { router } from 'expo-router';
 import { supabase } from '../Utils/SupabaseConfig';
-import { Modal, TextInput, Button, } from 'react-native';
 
 
 interface PlayVideoItemProps {
@@ -31,40 +30,40 @@ interface Comment {
     avatar: any
 }
 
-function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowHandler, isFollowing, isOwnVideo, user, isLoading }: PlayVideoItemProps) {
+function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const isFocused = useIsFocused();
     const videoRef = useRef(null);
     const [status, setStatus] = useState({});
     const [isMuted, setIsMuted] = useState(true);
-    const [likeCount, setLikeCount] = useState(video.VideoLikes?.length);
+    const [likeCount, setLikeCount] = useState(props.video.VideoLikes?.length);
     const [isModalVisible, setIsModalVisible] = useState(false); // Thêm state cho modal
     const [commentText, setCommentText] = useState(''); // Thêm state cho nội dung bình luận
     const [comments, setComments] = useState<Comment[]>([]); // Sửa: Thêm [] để chỉ định danh sách bình luận
     const isUserAlreadyLiked = useMemo(() => {
-        const result = video.VideoLikes?.some((item: any) => item.userEmail === user?.primaryEmailAddress?.emailAddress);
+        const result = props.video.VideoLikes?.some((item: any) => item.userEmail === props.user?.primaryEmailAddress?.emailAddress);
         console.log("User already liked:", result);
         return result;
-    }, [video.VideoLikes, user?.primaryEmailAddress?.emailAddress]);
+    }, [props.video.VideoLikes, props.user?.primaryEmailAddress?.emailAddress]);
     const [localIsLiked, setLocalIsLiked] = useState(isUserAlreadyLiked);
-    const [localVideo, setLocalVideo] = useState(video);
-    const [localIsFollowing, setLocalIsFollowing] = useState(isFollowing);
+    const [localVideo, setLocalVideo] = useState(props.video);
+    const [localIsFollowing, setLocalIsFollowing] = useState(props.isFollowing);
     // Thêm state cho modal tùy chọn bình luận
     const [selectedComment, setSelectedComment] = useState<Comment | null>(null);
     const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false); // Khai báo state cho modal chỉnh sửa
 
     useEffect(() => {
-        setLocalVideo(video);
-    }, [video]);
+        setLocalVideo(props.video);
+    }, [props.video]);
 
     useEffect(() => {
         setLocalIsLiked(isUserAlreadyLiked);
     }, [isUserAlreadyLiked]);
 
     useEffect(() => {
-        setLikeCount(video.VideoLikes?.length);
-    }, [video.VideoLikes]);
+        setLikeCount(props.video.VideoLikes?.length);
+    }, [props.video.VideoLikes]);
 
     useEffect(() => {
         if ((status as any).isLoaded) {
@@ -76,45 +75,45 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
         router.push({
             pathname: '/otherUserProfile', // Corrected pathname
             params: {
-                video: JSON.stringify(video) // Convert video object to a JSON string
+                video: JSON.stringify(props.video) // Convert video object to a JSON string
             }
         })
     }
 
     useEffect(() => {
         if (videoRef.current) {
-            if (isFocused && activeIndex === index) {
+            if (isFocused && props.activeIndex === props.index) {
                 (videoRef.current as any).playAsync();
             } else {
                 (videoRef.current as any).pauseAsync();
             }
         }
-    }, [isFocused, activeIndex, index]);
+    }, [isFocused, props.activeIndex, props.index]);
 
 
     const handleLike = useCallback(async () => {
 
         const newIsLiked = !localIsLiked;
         setLocalIsLiked(newIsLiked);
-        const updatedVideo = await userLikeHandler(localVideo, localIsLiked as boolean);
+        const updatedVideo = await props.userLikeHandler(localVideo, localIsLiked as boolean);
         if (updatedVideo as any) {
             setLocalVideo(updatedVideo as any);
         }
-    }, [localVideo, localIsLiked, userLikeHandler]);
+    }, [localVideo, localIsLiked, props.userLikeHandler]);
 
     const handleFollow = useCallback(async () => {
-        if (isOwnVideo) return; // Don't allow following own video
+        if (props.isOwnVideo) return; // Don't allow following own video
         try {
-            await userFollowHandler(video.Users.id, localIsFollowing);
+            await props.userFollowHandler(props.video.Users.id, localIsFollowing);
             setLocalIsFollowing(!localIsFollowing);
         } catch (error) {
             console.error('Failed to update follow status:', error);
         }
-    }, [video.Users.id, localIsFollowing, userFollowHandler, isOwnVideo]);
+    }, [props.video.Users.id, localIsFollowing, props.userFollowHandler, props.isOwnVideo]);
 
     useEffect(() => {
-        setLocalIsFollowing(isFollowing);
-    }, [isFollowing]);
+        setLocalIsFollowing(props.isFollowing);
+    }, [props.isFollowing]);
 
 
 
@@ -124,7 +123,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
         const { data, error } = await supabase
             .from('Comments')
             .select('id, userEmail, commentText, created_at, avatar')
-            .eq('postIdRef', video.id) // Lọc theo postIdRef
+            .eq('postIdRef', props.video.id) // Lọc theo postIdRef
         // .order('created_at', { ascending: false }); // Sắp xếp theo thời gian tạo, mới nhất trước
         if (error) {
             console.error('Error fetching comments:', error);
@@ -138,7 +137,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
         const { error } = await supabase
             .from('Comments')
             .insert([
-                { postIdRef: video.id, userEmail: user.primaryEmailAddress.emailAddress, commentText: commentText, avatar: user?.imageUrl }
+                { postIdRef: props.video.id, userEmail: props.user.primaryEmailAddress.emailAddress, commentText: commentText, avatar: props.user?.imageUrl }
             ]);
 
         if (error) {
@@ -149,8 +148,8 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                 .from('Notifications')
                 .insert([
                     {
-                        userEmail: video.emailRef, // Email của người chủ video
-                        notificationText: `${user.primaryEmailAddress.emailAddress} đã bình luận: ${commentText}`,
+                        userEmail: props.video.emailRef, // Email của người chủ video
+                        notificationText: `${props.user.primaryEmailAddress.emailAddress} đã bình luận: ${commentText}`,
                         isRead: false,
                         created_at: new Date(),
                     }
@@ -239,13 +238,13 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
     //////Comments
 
     const showFollowButton = useMemo(() => {
-        return user?.primaryEmailAddress?.emailAddress !== video.emailRef;
-    }, [user?.primaryEmailAddress?.emailAddress, video.emailRef]);
+        return props.user?.primaryEmailAddress?.emailAddress !== props.video.emailRef;
+    }, [props.user?.primaryEmailAddress?.emailAddress, props.video.emailRef]);
 
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={[styles.container, { width: windowWidth }]}>
-                {isLoading && (
+                {props.isLoading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#0000ff" />
                     </View>
@@ -255,7 +254,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                         <View style={styles.userInfo}>
                             <TouchableOpacity onPress={onOtherUserProfile}>
                                 <Image
-                                    source={{ uri: video.Users.profileImage }}
+                                    source={{ uri: props.video.Users.profileImage }}
                                     style={[styles.avatar, styles.avatarShadow]}
                                 />
                             </TouchableOpacity>
@@ -269,9 +268,9 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                                     />
                                 </TouchableOpacity>
                             )}
-                            <Text style={[styles.username, styles.textShadow]}>{video.Users.name}</Text>
+                            <Text style={[styles.username, styles.textShadow]}>{props.video.Users.name}</Text>
                         </View>
-                        <Text style={[styles.description, styles.textShadow]}>{video.description}</Text>
+                        <Text style={[styles.description, styles.textShadow]}>{props.video.description}</Text>
                     </View>
                     <View style={styles.actions}>
                         <View style={styles.likeCountContainer}>
@@ -296,10 +295,10 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                 <Video
                     ref={videoRef}
                     style={styles.video}
-                    source={{ uri: video.videoUrl }}
+                    source={{ uri: props.video.videoUrl }}
                     useNativeControls={false}
                     resizeMode={ResizeMode.COVER}
-                    shouldPlay={isFocused && activeIndex === index}
+                    shouldPlay={isFocused && props.activeIndex === props.index}
                     isMuted={isMuted}
                     isLooping
                     onPlaybackStatusUpdate={setStatus}
@@ -328,7 +327,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                                             <Text style={styles.commentTime}>{new Date(item.created_at).toLocaleString()}</Text>
                                         </View>
                                         {/* Chỉ hiển thị nút ba chấm nếu người dùng là người đã bình luận */}
-                                        {user?.primaryEmailAddress?.emailAddress === item.userEmail && (
+                                        {props.user?.primaryEmailAddress?.emailAddress === item.userEmail && (
                                             <TouchableOpacity onPress={() => openOptionsModal(item)}>
                                                 <Ionicons name="ellipsis-vertical" size={24} color="gray" />
                                             </TouchableOpacity>
@@ -340,7 +339,7 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
                         </View>
                         <View style={styles.inputContainer}>
                             <Image
-                                source={{ uri: user?.imageUrl }}
+                                source={{ uri: props.user?.imageUrl }}
                                 style={styles.avatarInput}
                             />
                             <TextInput

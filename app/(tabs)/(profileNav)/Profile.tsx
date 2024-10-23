@@ -1,4 +1,4 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import ProfileIntro from './ProfileIntro'; // Import the component
 import { supabase } from '@/app/Utils/SupabaseConfig';
@@ -35,8 +35,7 @@ const profileScreen = () => {
 
     const renderItem = ({ item }: { item: any }) => {
         return (
-            <View>
-                <ProfileIntro postList={postList} />
+            <View style={{ paddingHorizontal: 10 }}>
                 <UserPostList postList={postList} getLastesPosts={getUserPosts} isLoading={isLoading} />
             </View>
         );
@@ -44,12 +43,17 @@ const profileScreen = () => {
 
     return (
         <FlatList
-            style={{ padding: 20, paddingTop: 25 }}
             data={[{ key: 'profile' }]} // Dữ liệu giả để render các thành phần con
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
-            refreshing={isLoading}
-            onRefresh={getUserPosts}
+            ListHeaderComponent={
+                <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+                    <ProfileIntro postList={postList} />
+                </View>
+            }
+            refreshControl={
+                <RefreshControl refreshing={isLoading} onRefresh={getUserPosts} />
+            }
         />
     )
 }

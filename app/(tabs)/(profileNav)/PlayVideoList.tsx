@@ -1,9 +1,8 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { router, useLocalSearchParams } from 'expo-router';
 import PlayVideoItem from '../../(Screen)/PlayVideoItem';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet } from 'react-native';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 
@@ -193,7 +192,6 @@ export default function PlayVideoList() {
 
         return (
             <PlayVideoItem
-                style={{ flex: 1, width: '100%', height: '100%' }}
                 video={item}
                 activeIndex={currentVideoIndex}
                 index={index}

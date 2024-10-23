@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-expo'; // Import useClerk
 import Colors from '@/app/Utils/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 
 interface ProfileIntroProps {
     postList: any[];
-    navigation: any; // Thêm prop navigation
 }
 
-const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList, navigation }) => {
+const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
     const { user } = useUser();
     const { signOut } = useClerk(); // Lấy hàm signOut từ useClerk
     const [totalLikes, setTotalLikes] = useState(0);
@@ -28,15 +28,33 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList, navigation }) => 
 
     const handleSignOut = async () => {
         await signOut(); // Đăng xuất
-        navigation.navigate('LoginScreen'); // Điều hướng đến trang đăng nhập
+        router.replace({ pathname: '/LoginScreen' }); // Điều hướng đến trang đăng nhập
     };
 
     return (
         <View style={{ marginTop: 30 }}>
-            <Text style={{
-                fontSize: 24,
-                fontFamily: 'Outfit-Bold'
-            }}>Profile</Text>
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{
+                    fontSize: 24,
+                    fontFamily: 'Outfit-Bold'
+                }}>Profile</Text>
+                {/* Nút Đăng xuất */}
+                <TouchableOpacity onPress={handleSignOut} style={{
+                    padding: 5,
+                    width: "30%",
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                    backgroundColor: Colors.BACKGROUND_TRANSNP,
+                    borderRadius: 5,
+                    alignItems: 'center'
+                }}>
+                    <Text style={{
+                        fontSize: 18,
+                        color: Colors.WHITE,
+                        fontFamily: 'Outfit-Bold'
+                    }}>Đăng xuất</Text>
+                </TouchableOpacity>
+            </View>
             <View style={{ marginTop: 10, alignItems: 'center' }}>
                 <Image source={{ uri: user?.imageUrl }}
                     style={{
@@ -85,20 +103,6 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList, navigation }) => 
                     </Text>
                 </View>
             </View>
-            {/* Nút Đăng xuất */}
-            <TouchableOpacity onPress={handleSignOut} style={{
-                marginTop: 20,
-                padding: 10,
-                backgroundColor: Colors.BACKGROUND_TRANSNP,
-                borderRadius: 5,
-                alignItems: 'center'
-            }}>
-                <Text style={{
-                    fontSize: 18,
-                    color: Colors.WHITE,
-                    fontFamily: 'Outfit-Bold'
-                }}>Đăng xuất</Text>
-            </TouchableOpacity>
         </View>
     );
 }
