@@ -144,6 +144,18 @@ function PlayVideoItem({ video, activeIndex, index, userLikeHandler, userFollowH
         if (error) {
             console.error('Error inserting comment:', error);
         } else {
+            // Thêm thông báo vào bảng Notifications
+            await supabase
+                .from('Notifications')
+                .insert([
+                    {
+                        userEmail: video.emailRef, // Email của người chủ video
+                        notificationText: `${user.primaryEmailAddress.emailAddress} đã bình luận: ${commentText}`,
+                        isRead: false,
+                        created_at: new Date(),
+                    }
+                ]);
+
             setCommentText(''); // Reset nội dung bình luận
             fetchComments(); // Lấy lại danh sách bình luận
         }

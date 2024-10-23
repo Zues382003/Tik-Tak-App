@@ -1,13 +1,11 @@
 import { View, StyleSheet, Text, Image, Pressable, Animated } from 'react-native';
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { ResizeMode, Video } from 'expo-av';
 import Colors from '../Utils/Colors';
-import { Link } from 'expo-router'
-import { useOAuth } from '@clerk/clerk-expo'
-import * as Linking from 'expo-linking'
-import * as WebBrowser from 'expo-web-browser'
+import { useOAuth } from '@clerk/clerk-expo';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
-import { supabase } from '../Utils/SupabaseConfig';
 import { useRouter } from 'expo-router';
 
 // Move this outside of the component
@@ -23,91 +21,54 @@ export default function LoginScreen() {
     const scaleAnimGoogle = useRef(new Animated.Value(1)).current;
     const scaleAnimFacebook = useRef(new Animated.Value(1)).current;
 
-    const handlePressInGoogle = () => {
-        Animated.spring(scaleAnimGoogle, {
-            toValue: 0.8,
-            useNativeDriver: true,
-        }).start();
-    };
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false); // Flag to check if component is mounted
 
-    const handlePressOutGoogle = () => {
-        Animated.spring(scaleAnimGoogle, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
+    useEffect(() => {
+        setIsMounted(true); // Set mounted to true when component mounts
+        return () => {
+            setIsMounted(false); // Set mounted to false when component unmounts
+        };
+    }, []);
 
-    const handlePressInFacebook = () => {
-        Animated.spring(scaleAnimFacebook, {
-            toValue: 0.8,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const handlePressOutFacebook = () => {
-        Animated.spring(scaleAnimFacebook, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
-
-
-    const onPressGoogle = React.useCallback(async () => {
+    const onPressGoogle = useCallback(async () => {
         try {
-            const { createdSessionId, signIn, signUp, setActive } = await startGoogleOAuthFlow({
+            const { createdSessionId, setActive } = await startGoogleOAuthFlow({
                 redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
-            })
+            });
 
             if (createdSessionId) {
-                setActive!({ session: createdSessionId })
-                // Delay navigation
-                setTimeout(() => {
-                    router.replace('/(tabs)');
-                }, 100);
-
-                if (signUp?.emailAddress) {
-
-                    const { data, error } = await supabase
-                        .from('Users')
-                        .insert([
-                            {
-                                name: signUp?.firstName,
-                                email: signUp?.emailAddress,
-                                username: signUp?.emailAddress?.split('@')[0]
-                            }
-                        ])
-                        .select()
-                    if (data) {
-                        console.log(data);
-                    } else {
-                        console.log(error);
-                    }
-                }
-            } else {
-                // Use signIn or signUp for next steps such as MFA
+                setActive!({ session: createdSessionId });
+                setSessionId(createdSessionId); // Lưu sessionId
             }
         } catch (err) {
-            console.error('OAuth error', err)
+            console.error('OAuth error', err);
         }
-    }, [router])
+    }, [startGoogleOAuthFlow]);
 
-    const onPressFacebook = React.useCallback(async () => {
+    const onPressFacebook = useCallback(async () => {
         try {
-            const { createdSessionId, signIn, signUp, setActive } = await startFacebookOAuthFlow({
+            const { createdSessionId, setActive } = await startFacebookOAuthFlow({
                 redirectUrl: Linking.createURL('/dashboard', { scheme: 'myapp' }),
-            })
+            });
 
             if (createdSessionId) {
-                setActive!({ session: createdSessionId })
-
-            } else {
-                // Use signIn or signUp for next steps such as MFA
+                setActive!({ session: createdSessionId });
+                setSessionId(createdSessionId); // Lưu sessionId
             }
         } catch (err) {
-            console.error('OAuth error', err)
+            console.error('OAuth error', err);
         }
-    }, [startFacebookOAuthFlow])
+    }, [startFacebookOAuthFlow]);
 
+    useEffect(() => {
+        if (sessionId && isMounted) {
+            // Delay navigation
+            setTimeout(() => {
+                router.replace('/(tabs)');
+            }, 100);
+        }
+    }, [sessionId, router, isMounted]);
 
     return (
         <View style={{ flex: 1 }}>
@@ -128,24 +89,20 @@ export default function LoginScreen() {
                 flex: 1,
                 backgroundColor: Colors.BACKGROUND_TRANSNP,
             }}>
-                <Text
-                    style={{
-                        fontFamily: 'Outfit-Bold',
-                        color: Colors.WHITE,
-                        fontSize: 40,
-                    }}
-                >
+                <Text style={{
+                    fontFamily: 'Outfit-Bold',
+                    color: Colors.WHITE,
+                    fontSize: 40,
+                }}>
                     Tik Tak
                 </Text>
-                <Text
-                    style={{
-                        fontFamily: 'Outfit-Regular',
-                        color: Colors.WHITE,
-                        fontSize: 16,
-                        textAlign: 'center',
-                        marginTop: 10
-                    }}
-                >
+                <Text style={{
+                    fontFamily: 'Outfit-Regular',
+                    color: Colors.WHITE,
+                    fontSize: 16,
+                    textAlign: 'center',
+                    marginTop: 10
+                }}>
                     Ultimate Place to Share your Short Videos with Great Community
                 </Text>
 
@@ -153,10 +110,7 @@ export default function LoginScreen() {
                     <Animated.View style={{ transform: [{ scale: scaleAnimGoogle }] }}>
                         <Pressable
                             onPress={onPressGoogle}
-                            onPressIn={handlePressInGoogle}
-                            onPressOut={handlePressOutGoogle}
                             style={styles.oauthButton}>
-
                             <Image style={{ width: 30, height: 30 }}
                                 source={require('../../assets/images/logo_google.jpg')} />
                             <Text style={{ fontFamily: 'Outfit-Medium', color: Colors.BLACK, fontSize: 16 }}>
@@ -167,10 +121,7 @@ export default function LoginScreen() {
                     <Animated.View style={{ transform: [{ scale: scaleAnimFacebook }], marginTop: 20 }}>
                         <Pressable
                             onPress={onPressFacebook}
-                            onPressIn={handlePressInFacebook}
-                            onPressOut={handlePressOutFacebook}
                             style={styles.oauthButton}>
-
                             <Image style={{ width: 32, height: 32 }}
                                 source={require('../../assets/images/logo_facebook.png')} />
                             <Text style={{ fontFamily: 'Outfit-Medium', color: Colors.BLACK, fontSize: 16 }}>
@@ -183,9 +134,6 @@ export default function LoginScreen() {
         </View>
     );
 }
-
-
-
 
 const styles = StyleSheet.create({
     video: {
