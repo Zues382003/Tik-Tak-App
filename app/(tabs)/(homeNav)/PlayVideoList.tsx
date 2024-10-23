@@ -170,7 +170,6 @@ export default function PlayVideoList() {
     useEffect(() => {
         if (params.video) {
             const parsedVideo = JSON.parse(params.video as string);
-            console.log("Parsed video:", parsedVideo);
             if (Array.isArray(parsedVideo)) {
                 setVideoList(parsedVideo);
                 getLastesPosts();
@@ -183,9 +182,9 @@ export default function PlayVideoList() {
         }
     }, [params.video, getLastesPosts]);
 
-    useEffect(() => {
-        console.log("Updated videoList:", videoList);
-    }, [videoList]);
+    // useEffect(() => {
+    //     console.log("Updated videoList:", videoList);
+    // }, [videoList]);
 
     const renderItem = useCallback(({ item, index }: { item: VideoItem; index: number }) => {
         const isFollowing = followedUsers.includes(item.Users.id);

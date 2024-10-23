@@ -71,8 +71,6 @@ export default function HomeScreen() {
 
         if (error) {
             console.error("Error updating profile image:", error);
-        } else {
-            console.log("Profile image updated successfully:", data);
         }
     }
 
@@ -90,7 +88,6 @@ export default function HomeScreen() {
                 return;
             }
 
-            console.log("Data video", data);
             if (data === null || data.length === 0) {
                 console.log("No data returned from the query");
             } else {

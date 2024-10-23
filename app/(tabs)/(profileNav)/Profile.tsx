@@ -22,11 +22,9 @@ const profileScreen = () => {
             .eq('emailRef', user?.primaryEmailAddress?.emailAddress)
             .order('created_at', { ascending: false });
 
-        console.log(data?.length);
         if (data) {
             setPostList(data as any[]); // Type assertion to any[]
             setIsLoading(false);
-            console.log("postList: ", data);
         } else {
             setIsLoading(false);
             console.log("error: ", error);

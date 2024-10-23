@@ -20,16 +20,11 @@ export default function AddScreen() {
             quality: 1,
         });
 
-        console.log(result);
-
         if (!result.canceled) {
             const videoUri = result.assets[0].uri;
-            console.log("Selected video URI:", videoUri);
 
             // Check if the file exists
             const fileInfo = await FileSystem.getInfoAsync(videoUri);
-            console.log("File exists:", fileInfo.exists);
-            console.log("File info:", fileInfo);
 
             if (fileInfo.exists) {
                 generateVideoThumbnail(videoUri);
@@ -49,8 +44,6 @@ export default function AddScreen() {
                     time: 0
                 }
             );
-            console.log("Thumbnail generated at:", uri);
-            console.log("Video URI being passed:", videoUri);
 
             // Before navigation
             await AsyncStorage.setItem('videoUri', videoUri);

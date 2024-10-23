@@ -34,7 +34,6 @@ export default function OtherUserProfile() {
     useEffect(() => {
         if (params.video) {
             const parsedVideo = JSON.parse(params.video as string);
-            console.log("Parsed video:", parsedVideo);
             setVideoList(parsedVideo);
         }
     }, []);
@@ -45,7 +44,6 @@ export default function OtherUserProfile() {
     useEffect(() => {
         if (params.video) {
             const parsedVideo = JSON.parse(params.video as string);
-            console.log("Parsed video:", parsedVideo);
             setVideoList(parsedVideo);
         }
     }, [])
@@ -64,11 +62,9 @@ export default function OtherUserProfile() {
             .eq('emailRef', videoList?.Users.email) // Access the Users property of the first VideoItem
             .order('created_at', { ascending: false });
 
-        console.log(data?.length);
         if (data) {
             setPostList(data as any[]); // Type assertion to any[]
             setIsLoading(false);
-            console.log("postList: ", data);
         } else {
             setIsLoading(false);
             console.log("error: ", error);

@@ -42,7 +42,6 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
     const [comments, setComments] = useState<Comment[]>([]); // Sửa: Thêm [] để chỉ định danh sách bình luận
     const isUserAlreadyLiked = useMemo(() => {
         const result = props.video.VideoLikes?.some((item: any) => item.userEmail === props.user?.primaryEmailAddress?.emailAddress);
-        console.log("User already liked:", result);
         return result;
     }, [props.video.VideoLikes, props.user?.primaryEmailAddress?.emailAddress]);
     const [localIsLiked, setLocalIsLiked] = useState(isUserAlreadyLiked);
@@ -149,7 +148,8 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                 .insert([
                     {
                         userEmail: props.video.emailRef, // Email của người chủ video
-                        notificationText: `${props.user.primaryEmailAddress.emailAddress} đã bình luận: ${commentText}`,
+                        notificationText: `${commentText}`,
+                        pushCommentEmail: `${props.user.primaryEmailAddress.emailAddress}`,
                         isRead: false,
                         created_at: new Date(),
                     }
@@ -174,7 +174,6 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                 setComments(prevComments => [...prevComments, payload.new as Comment]);
             })
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Comments' }, (payload) => {
-                console.log('Comment updated:', payload.new); // In ra thông tin bình luận đã cập nhật
                 setComments(prevComments =>
                     prevComments.map(comment =>
                         comment.id === payload.new.id ? { ...comment, ...payload.new as Comment } : comment
@@ -183,7 +182,6 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
 
             })
             .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'Comments' }, (payload) => {
-                console.log('Comment deleted:', payload.old); // In ra thông tin bình luận đã xóa
                 setComments(prevComments => prevComments.filter(comment => comment.id !== payload.old.id));
 
             })

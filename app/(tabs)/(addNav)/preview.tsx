@@ -29,23 +29,19 @@ export default function PreviewScreen() {
         getVideoUri();
     }, []);
 
-    useEffect(() => {
-        console.log('Thumbnail URI:', thumbnailUri);
-    }, [thumbnailUri]);
 
-    useEffect(() => {
-        const checkFile = async () => {
-            console.log('Video URI in preview:', videoUri);
-            try {
-                const fileInfo = await FileSystem.getInfoAsync(videoUri);
-                console.log('File exists in preview:', fileInfo.exists);
-                console.log('File info in preview:', fileInfo);
-            } catch (error) {
-                console.error('Error checking file:', error);
-            }
-        };
-        checkFile();
-    }, [videoUri]);
+    // useEffect(() => {
+    //     const checkFile = async () => {
+    //         try {
+    //             const fileInfo = await FileSystem.getInfoAsync(videoUri);
+    //             console.log('File exists in preview:', fileInfo.exists);
+    //             console.log('File info in preview:', fileInfo);
+    //         } catch (error) {
+    //             console.error('Error checking file:', error);
+    //         }
+    //     };
+    //     checkFile();
+    // }, [videoUri]);
 
     const uploadContent = async () => {
         setIsUploading(true);
@@ -71,7 +67,6 @@ export default function PreviewScreen() {
             if (error) throw error;
 
             setUploadProgress(100);
-            console.log('Upload and save complete. Data:', data);
 
             Alert.alert('Upload Successful', 'Your content has been uploaded and saved successfully.', [
                 { text: 'OK', onPress: () => router.back() }

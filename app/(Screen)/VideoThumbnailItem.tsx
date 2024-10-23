@@ -9,7 +9,6 @@ export default function VideoThumbnailItem({ video, isDisplayTrashIcon, OnProfil
     const router = useRouter();
 
     useEffect(() => {
-        console.log("Rendering VideoThumbnailItem:", video);
     }, [video]);
 
     const handlePress = () => {
