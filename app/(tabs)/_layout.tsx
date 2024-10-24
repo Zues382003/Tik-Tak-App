@@ -59,7 +59,9 @@ export default function TabLayout() {
                 }, 5000);
             })
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Notifications' }, (payload) => {
-                setNewNotification(payload.new as Notification); // Cập nhật thông báo mới khi có sự kiện UPDATE
+                if (!payload.new.isRead) {
+                    setNewNotification(payload.new as Notification); // Cập nhật thông báo mới khi có sự kiện UPDATE
+                }
                 setNotifications(prev =>
                     prev.map(notification =>
                         notification.id === payload.new.id ? (payload.new as Notification) : notification

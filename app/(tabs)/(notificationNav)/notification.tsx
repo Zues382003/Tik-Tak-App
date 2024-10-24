@@ -4,11 +4,16 @@ import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Colors from '@/app/Utils/Colors';
+import { router } from 'expo-router';
 
 type User = {
     username: string,
     email: string,
     profileImage: string
+}
+
+type Comment = {
+    postIdRef: number
 }
 
 type Notification = {
@@ -17,7 +22,8 @@ type Notification = {
     userEmail: string,
     notificationText: string
     isRead: boolean,
-    created_at: string
+    created_at: string,
+    Comments: Comment,
 }
 
 export default function NotificationScreen() {
@@ -31,7 +37,7 @@ export default function NotificationScreen() {
         setIsLoading(true);
         const { data, error } = await supabase
             .from('Notifications')
-            .select('*, Users(username, profileImage, email)')
+            .select('*, Users(username, profileImage, email), Comments(postIdRef)')
             .eq('userEmail', user?.primaryEmailAddress?.emailAddress)
             // .order('isRead', { ascending: true }) // Sắp xếp theo isRead trước
             .order('created_at', { ascending: false }) // Sau đó sắp xếp theo created_at
@@ -44,6 +50,7 @@ export default function NotificationScreen() {
         setIsLoading(false);
 
     };
+
 
     useEffect(() => {
         fetchNotifications();
@@ -96,22 +103,30 @@ export default function NotificationScreen() {
 
     const handleNotificationPress = async (item: Notification) => {
 
-        const { error } = await supabase
-            .from('Notifications')
-            .update({ isRead: true })
-            .eq('id', item.id);
+        if (!item.isRead) {
+            const { error } = await supabase
+                .from('Notifications')
+                .update({ isRead: true })
+                .eq('id', item.id);
 
-        if (error) {
-            console.error('Error updating notification:', error);
-        } else {
-            fetchNotifications();
+            if (error) {
+                console.error('Error updating notification:', error);
+            } else {
+                fetchNotifications();
+            }
         }
-        // Điều hướng đến video và mở modal bình luận
-        // navigation.navigate('PlayVideoItem', {
-        //     videoId: notification.postIdRef,
-        //     commentId: notification.commentId,
-        //     isNotification: true // Thêm tham số để xác định đây là từ thông báo
-        // });
+
+        const { data } = await supabase
+            .from('PostList')
+            .select('*, Users(username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
+            .range(0, 1)
+            .eq('id', item.Comments.postIdRef)
+
+
+        router.push({
+            pathname: '/PlayVideoList',
+            params: { video: JSON.stringify(data) }
+        });
     };
 
 
