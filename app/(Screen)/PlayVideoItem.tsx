@@ -133,15 +133,17 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
 
     // Hàm để gửi bình luận
     const handleCommentSubmit = async () => {
-        const { error } = await supabase
+        const { data: commentData, error } = await supabase
             .from('Comments')
             .insert([
                 { postIdRef: props.video.id, userEmail: props.user.primaryEmailAddress.emailAddress, commentText: commentText, avatar: props.user?.imageUrl }
-            ]);
+            ])
+            .select(); // Thêm select để lấy dữ liệu đã chèn
 
         if (error) {
             console.error('Error inserting comment:', error);
         } else {
+            const commentId = commentData[0].id; // Lấy id từ comment vừa chèn
             // Thêm thông báo vào bảng Notifications
             await supabase
                 .from('Notifications')
@@ -151,6 +153,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                         notificationText: `${commentText}`,
                         pushCommentEmail: `${props.user.primaryEmailAddress.emailAddress}`,
                         isRead: false,
+                        idComment: commentId, // Sử dụng commentId ở đây
                         created_at: new Date(),
                     }
                 ]);
@@ -631,14 +634,12 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        marginRight: 10,
+        marginRight: 5,
     },
     commentContent: {
         flex: 1,
-        backgroundColor: 'white',
-        borderRadius: 5,
-        padding: 10,
-        marginLeft: 10,
+        padding: 5,
+        marginLeft: 5,
     },
     commentText: {
         fontSize: 16,

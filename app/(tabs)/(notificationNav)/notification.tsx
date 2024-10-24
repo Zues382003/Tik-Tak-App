@@ -24,6 +24,7 @@ export default function NotificationScreen() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+
     const { user } = useUser();
 
     const fetchNotifications = async () => {
@@ -52,6 +53,7 @@ export default function NotificationScreen() {
             .channel('notifications-channel')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Notifications' }, (payload) => {
                 setNotifications(prev => [payload.new as Notification, ...prev]);
+
             })
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Notifications' }, (payload) => {
                 setNotifications(prev =>

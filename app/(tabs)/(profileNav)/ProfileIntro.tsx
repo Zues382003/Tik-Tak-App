@@ -76,10 +76,10 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
                 marginTop: 20,
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: 'space-between'
+                justifyContent: 'space-around'
             }}>
                 <View style={{
-                    padding: 20,
+                    padding: 10,
                     alignItems: 'center'
                 }}>
                     <Ionicons name="videocam" size={24} color="black" />
@@ -91,7 +91,7 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
                     </Text>
                 </View>
                 <View style={{
-                    padding: 20,
+                    padding: 10,
                     alignItems: 'center'
                 }}>
                     <Ionicons name="heart" size={24} color="black" />
