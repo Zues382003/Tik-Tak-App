@@ -6,32 +6,33 @@ import { Ionicons } from '@expo/vector-icons';
 interface ProfileIntroProps {
     postList: any[]; // Replace 'any' with the correct type for postList
     user: any; // Add this line, replace 'any' with the correct type for user
+    dataUser: any
 }
 
-const OtherUserProfileIntro: React.FC<ProfileIntroProps> = ({ postList, user }) => {
+const OtherUserProfileIntro: React.FC<ProfileIntroProps> = (props) => {
 
 
     const [totalLikes, setTotalLikes] = useState(0);
 
     useEffect(() => {
         calculateToltalLikes();
-    }, [postList])
+    }, [props.postList])
 
     const calculateToltalLikes = () => {
         let totalLikes = 0;
-        postList?.forEach((post) => {
+        props.postList?.forEach((post) => {
             totalLikes += post?.VideoLikes?.length;
         })
         setTotalLikes(totalLikes);
     }
     return (
-        <View style={{ marginTop: 30 }}>
+        <View>
             <Text style={{
                 fontSize: 24,
                 fontFamily: 'Outfit-Bold'
             }}>Profile</Text>
             <View style={{ marginTop: 10, alignItems: 'center' }}>
-                <Image source={{ uri: user?.profileImage }}  // Access the first element of the array
+                <Image source={{ uri: props.user?.profileImage }}  // Access the first element of the array
                     style={{
                         width: 70,
                         height: 70,
@@ -40,18 +41,18 @@ const OtherUserProfileIntro: React.FC<ProfileIntroProps> = ({ postList, user }) 
                 <Text style={{
                     fontSize: 22,
                     fontFamily: 'Outfit-Medium'
-                }}>{user?.name}</Text>
+                }}>{props.user?.name}</Text>
                 <Text style={{
                     fontSize: 17,
                     fontFamily: 'Outfit-Regular',
                     color: Colors.BACKGROUND_TRANSNP
-                }}>{user?.email}</Text>
+                }}>{props.dataUser?.bio || 'No bio available'}</Text>
             </View>
             <View style={{
                 marginTop: 20,
                 display: 'flex',
                 flexDirection: 'row',
-                justifyContent: 'space-between'
+                justifyContent: 'space-around'
             }}>
                 <View style={{
                     padding: 20,
@@ -62,7 +63,7 @@ const OtherUserProfileIntro: React.FC<ProfileIntroProps> = ({ postList, user }) 
                         fontFamily: 'Outfit-Bold',
                         fontSize: 20
                     }}>
-                        {postList?.length} Posts
+                        {props.postList?.length} Posts
                     </Text>
                 </View>
                 <View style={{

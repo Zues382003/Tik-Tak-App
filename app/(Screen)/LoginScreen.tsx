@@ -65,12 +65,12 @@ export default function LoginScreen() {
             // Delay navigation
             setTimeout(() => {
                 router.replace('/(tabs)');
-            }, 2000);
+            }, 1000);
         }
     }, [sessionId, router, isMounted]);
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
             <Video
                 style={styles.video}
                 source={{
@@ -80,39 +80,22 @@ export default function LoginScreen() {
                 resizeMode={ResizeMode.COVER}
                 isLooping={true}
             />
-            <View style={{
-                display: 'flex',
-                alignItems: 'center',
-                paddingHorizontal: 20,
-                paddingTop: 100,
-                flex: 1,
-                backgroundColor: Colors.BACKGROUND_TRANSNP,
-            }}>
-                <Text style={{
-                    fontFamily: 'Outfit-Bold',
-                    color: Colors.WHITE,
-                    fontSize: 40,
-                }}>
+            <View style={styles.innerContainer}>
+                <Text style={styles.title}>
                     Tik Tak
                 </Text>
-                <Text style={{
-                    fontFamily: 'Outfit-Regular',
-                    color: Colors.WHITE,
-                    fontSize: 16,
-                    textAlign: 'center',
-                    marginTop: 10
-                }}>
+                <Text style={styles.subtitle}>
                     Ultimate Place to Share your Short Videos with Great Community
                 </Text>
 
-                <View style={{ position: 'absolute', bottom: 130 }}>
+                <View style={styles.buttonContainer}>
                     <Animated.View style={{ transform: [{ scale: scaleAnimGoogle }] }}>
                         <Pressable
                             onPress={onPressGoogle}
                             style={styles.oauthButton}>
-                            <Image style={{ width: 30, height: 30 }}
+                            <Image style={styles.icon}
                                 source={require('../../assets/images/logo_google.jpg')} />
-                            <Text style={{ fontFamily: 'Outfit-Medium', color: Colors.BLACK, fontSize: 16 }}>
+                            <Text style={styles.buttonText}>
                                 Continue with Google
                             </Text>
                         </Pressable>
@@ -121,9 +104,9 @@ export default function LoginScreen() {
                         <Pressable
                             onPress={onPressFacebook}
                             style={styles.oauthButton}>
-                            <Image style={{ width: 32, height: 32 }}
+                            <Image style={styles.icon}
                                 source={require('../../assets/images/logo_facebook.png')} />
-                            <Text style={{ fontFamily: 'Outfit-Medium', color: Colors.BLACK, fontSize: 16 }}>
+                            <Text style={styles.buttonText}>
                                 Continue with Facebook
                             </Text>
                         </Pressable>
@@ -135,12 +118,39 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     video: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
+    },
+    innerContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 100,
+        flex: 1,
+        backgroundColor: Colors.BACKGROUND_TRANSNP,
+    },
+    title: {
+        fontFamily: 'Outfit-Bold',
+        color: Colors.WHITE,
+        fontSize: 40,
+    },
+    subtitle: {
+        fontFamily: 'Outfit-Regular',
+        color: Colors.WHITE,
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 10,
+    },
+    buttonContainer: {
+        position: 'absolute',
+        bottom: 130,
     },
     oauthButton: {
         display: 'flex',
@@ -151,5 +161,14 @@ const styles = StyleSheet.create({
         borderRadius: 99,
         paddingHorizontal: 30,
         gap: 10,
-    }
+    },
+    icon: {
+        width: 30,
+        height: 30,
+    },
+    buttonText: {
+        fontFamily: 'Outfit-Medium',
+        color: Colors.BLACK,
+        fontSize: 16,
+    },
 });

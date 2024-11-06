@@ -1,9 +1,10 @@
-import { View, FlatList } from 'react-native'
+import { View, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router';
 import OtherUserProfileIntro from './otherUserProfileIntro';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import OtherUserPostList from './otherUserPostList';
+import { PostListService } from '@/Service/PostListService';
 
 export interface VideoLike {
     postIdRef: number;
@@ -30,6 +31,7 @@ export interface VideoItem {
 export default function OtherUserProfile() {
     const params = useLocalSearchParams();
     const [videoList, setVideoList] = useState<any>();
+    const [dataUser, setDataUser] = useState([]);
 
     useEffect(() => {
         if (params.video) {
@@ -50,43 +52,52 @@ export default function OtherUserProfile() {
 
     useEffect(() => {
         if (videoList) {
-            getUserPosts();
+            setIsLoading(true);
+            getUserPostsFromService();
+            getDataUserFromService();
+            setIsLoading(false);
         }
     }, [videoList])
 
-    const getUserPosts = async () => {
-        setIsLoading(true);
-        const { data, error } = await supabase
-            .from('PostList')
-            .select('*, Users(*), VideoLikes(postIdRef,userEmail)')
-            .eq('emailRef', videoList?.Users.email) // Access the Users property of the first VideoItem
-            .order('created_at', { ascending: false });
+    const getUserPostsFromService = async () => {
+        try {
+            const userPosts = await PostListService.getUserPosts(videoList?.Users.email);
+            setPostList(userPosts);
+        } catch (error) {
+            console.error("Error fetching user posts from service:", error);
+        }
+    };
 
-        if (data) {
-            setPostList(data as any[]); // Type assertion to any[]
-            setIsLoading(false);
-        } else {
-            setIsLoading(false);
-            console.log("error: ", error);
+    const getDataUserFromService = async () => {
+        try {
+            const data = await PostListService.getDataUser(videoList?.Users.email);
+            setDataUser(data);
+        } catch (error) {
+            console.error("Error fetching data user from service:", error);
         }
     }
 
     const renderItem = ({ item }: { item: any }) => {
         return (
-            <View>
-                <OtherUserProfileIntro user={videoList?.Users} postList={postList} />
-                <OtherUserPostList postList={postList} getLastesPosts={getUserPosts} isLoading={isLoading} />
+            <View style={{ paddingHorizontal: 10 }}>
+                <OtherUserPostList postList={postList} getLastesPosts={getUserPostsFromService} isLoading={isLoading} />
             </View>
         );
     };
+
     return (
         <FlatList
-            style={{ padding: 8, paddingTop: 25 }}
-            data={[{ key: 'other user profile' }]} // Dữ liệu giả để render các thành phần con
+            data={[{ key: 'profile' }]} // Dữ liệu giả để render các thành phần con
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
-            refreshing={isLoading}
-            onRefresh={getUserPosts}
+            ListHeaderComponent={
+                <View style={{ paddingHorizontal: 10, paddingTop: 20 }}>
+                    <OtherUserProfileIntro postList={postList} dataUser={dataUser[0]} user={videoList?.Users} />
+                </View>
+            }
+            refreshControl={
+                <RefreshControl refreshing={isLoading} onRefresh={getUserPostsFromService} />
+            }
         />
     )
 }

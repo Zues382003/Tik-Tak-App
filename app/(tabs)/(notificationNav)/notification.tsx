@@ -39,6 +39,7 @@ export default function NotificationScreen() {
             .from('Notifications')
             .select('*, Users(username, profileImage, email), Comments(postIdRef)')
             .eq('userEmail', user?.primaryEmailAddress?.emailAddress)
+            .neq('pushCommentEmail', user?.primaryEmailAddress?.emailAddress)
             // .order('isRead', { ascending: true }) // Sắp xếp theo isRead trước
             .order('created_at', { ascending: false }) // Sau đó sắp xếp theo created_at
 

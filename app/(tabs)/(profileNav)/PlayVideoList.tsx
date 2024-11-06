@@ -5,6 +5,7 @@ import PlayVideoItem from '../../(Screen)/PlayVideoItem';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
+import { PostListService } from '@/Service/PostListService';
 
 export interface VideoLike {
     postIdRef: number;
@@ -143,18 +144,17 @@ export default function PlayVideoList() {
 
     const getLastesPosts = useCallback(async (selectedVideoId?: number) => {
         setIsLoading(true);
+        const userEmail = user?.primaryEmailAddress?.emailAddress?.toString();
+        if (!userEmail) {
+            console.error("User email is undefined");
+            return;
+        }
         try {
-            const { data, error } = await supabase
-                .from('PostList')
-                .select('*, Users(id,username, name, profileImage, email),VideoLikes(postIdRef, userEmail)')
-                .eq('emailRef', user?.primaryEmailAddress?.emailAddress)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const data = await PostListService.getUserPosts(userEmail) as any;
 
             if (selectedVideoId) {
-                const selectedVideo = data.find(video => video.id === selectedVideoId);
-                const otherVideos = data.filter(video => video.id !== selectedVideoId);
+                const selectedVideo = data.find((video: any) => video.id === selectedVideoId);
+                const otherVideos = data.filter((video: any) => video.id !== selectedVideoId);
                 setVideoList(selectedVideo ? [selectedVideo, ...otherVideos] : data);
             } else {
                 setVideoList(data || []);

@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { supabase } from '../Utils/SupabaseConfig';
 
 
-interface PlayVideoItemProps {
+type PlayVideoItemProps = {
     video: VideoItem;
     activeIndex: number;
     index: number;
@@ -22,12 +22,16 @@ interface PlayVideoItemProps {
     isLoading: boolean;
 }
 
-interface Comment {
+type Comment = {
     id: any;
     userEmail: any;
     commentText: any;
     created_at: any;
-    avatar: any
+    Users: Users;
+}
+
+type Users = {
+    profileImage: any;
 }
 
 function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
@@ -121,7 +125,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
     const fetchComments = async () => {
         const { data, error } = await supabase
             .from('Comments')
-            .select('id, userEmail, commentText, created_at, avatar')
+            .select('*,Users(profileImage)')
             .eq('postIdRef', props.video.id) // Lọc theo postIdRef
         // .order('created_at', { ascending: false }); // Sắp xếp theo thời gian tạo, mới nhất trước
         if (error) {
@@ -136,7 +140,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
         const { data: commentData, error } = await supabase
             .from('Comments')
             .insert([
-                { postIdRef: props.video.id, userEmail: props.user.primaryEmailAddress.emailAddress, commentText: commentText, avatar: props.user?.imageUrl }
+                { postIdRef: props.video.id, userEmail: props.user.primaryEmailAddress.emailAddress, commentText: commentText }
             ])
             .select(); // Thêm select để lấy dữ liệu đã chèn
 
@@ -255,7 +259,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                         <View style={styles.userInfo}>
                             <TouchableOpacity onPress={onOtherUserProfile}>
                                 <Image
-                                    source={{ uri: props.video.Users.profileImage }}
+                                    source={{ uri: props.video.Users?.profileImage }}
                                     style={[styles.avatar, styles.avatarShadow]}
                                 />
                             </TouchableOpacity>
@@ -277,7 +281,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                         <View style={styles.likeCountContainer}>
                             <TouchableOpacity onPress={handleLike} style={styles.actionButton}>
                                 {localIsLiked ? (
-                                    <AntDesign name="heart" size={40} color={Colors.WHITE} style={styles.icon} />
+                                    <AntDesign name="heart" size={40} color={Colors.FILlHEART} style={styles.icon} />
                                 ) : (
                                     <AntDesign name="hearto" size={40} color={Colors.WHITE} style={styles.icon} />
                                 )}
@@ -303,6 +307,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                     isMuted={isMuted}
                     isLooping
                     onPlaybackStatusUpdate={setStatus}
+
                 />
                 {/* Modal cho bình luận */}
                 <Modal
@@ -320,7 +325,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                                 renderItem={({ item }) => (
                                     <View style={styles.commentItem}>
                                         <Image
-                                            source={{ uri: item.avatar }}
+                                            source={{ uri: item.Users?.profileImage }}
                                             style={styles.avatarComment}
                                         />
                                         <View style={styles.commentContent}>
@@ -528,7 +533,8 @@ const styles = StyleSheet.create({
     },
     actions: {
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-end',
+        flex: 1,
         gap: 5,
     },
     actionButton: {

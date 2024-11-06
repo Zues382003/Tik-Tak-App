@@ -4,7 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Animated, Text, View } from 'react-native';
 import { supabase } from '../Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
-
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Octicons from '@expo/vector-icons/Octicons';
 
 type User = {
     username: string,
@@ -31,6 +32,7 @@ export default function TabLayout() {
             .from('Notifications')
             .select('*, Users(username, profileImage, email)')
             .eq('userEmail', user?.primaryEmailAddress?.emailAddress)
+            .neq('pushCommentEmail', user?.primaryEmailAddress?.emailAddress)
             .eq('isRead', false)
             // .order('isRead', { ascending: true }) // Sắp xếp theo isRead trước
             .order('created_at', { ascending: false }) // Sau đó sắp xếp theo created_at
@@ -140,7 +142,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Home',
                         headerShown: false,
-                        tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+                        tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
                     }}
                 />
                 <Tabs.Screen
@@ -148,7 +150,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Notification',
                         headerShown: false,
-                        tabBarIcon: ({ color, size }) => <Ionicons name="notifications-sharp" size={size} color={color} />,
+                        tabBarIcon: ({ color, size }) => <Ionicons name="notifications-outline" size={size} color={color} />,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     }}
                 />
@@ -157,7 +159,15 @@ export default function TabLayout() {
                     options={{
                         title: 'Add',
                         headerShown: false,
-                        tabBarIcon: ({ color, size }) => <Ionicons name="add-circle" size={size} color={color} />,
+                        tabBarIcon: ({ color, size }) => <Octicons name="diff-added" size={size} color={color} />,
+                    }}
+                />
+                <Tabs.Screen
+                    name="(inboxNav)"
+                    options={{
+                        title: 'Inbox',
+                        headerShown: false,
+                        tabBarIcon: ({ color, size }) => <AntDesign name="message1" size={size} color={color} />,
                     }}
                 />
                 <Tabs.Screen
@@ -165,7 +175,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Profile',
                         headerShown: false,
-                        tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+                        tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
                     }}
                 />
             </Tabs>

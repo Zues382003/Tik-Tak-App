@@ -7,20 +7,21 @@ import { router } from 'expo-router';
 
 interface ProfileIntroProps {
     postList: any[];
+    dataUser: any;
 }
 
-const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
+const ProfileIntro: React.FC<ProfileIntroProps> = (props) => {
     const { user } = useUser();
-    const { signOut } = useClerk(); // Lấy hàm signOut từ useClerk
+    const { signOut } = useClerk();
     const [totalLikes, setTotalLikes] = useState(0);
 
     useEffect(() => {
         calculateToltalLikes();
-    }, [postList]);
+    }, [props.postList]);
 
     const calculateToltalLikes = () => {
         let totalLikes = 0;
-        postList?.forEach((post) => {
+        props.postList?.forEach((post) => {
             totalLikes += post?.VideoLikes?.length;
         });
         setTotalLikes(totalLikes);
@@ -70,7 +71,7 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
                     fontSize: 17,
                     fontFamily: 'Outfit-Regular',
                     color: Colors.BACKGROUND_TRANSNP
-                }}>{user?.primaryEmailAddress?.emailAddress}</Text>
+                }}>{props.dataUser?.bio || 'No bio available'}</Text>
             </View>
             <View style={{
                 marginTop: 20,
@@ -87,7 +88,7 @@ const ProfileIntro: React.FC<ProfileIntroProps> = ({ postList }) => {
                         fontFamily: 'Outfit-Bold',
                         fontSize: 20
                     }}>
-                        {postList?.length} Posts
+                        {props.postList?.length} Posts
                     </Text>
                 </View>
                 <View style={{

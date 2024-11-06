@@ -74,8 +74,9 @@ export default function VideoThumbnailItem({ video, isDisplayTrashIcon, OnProfil
                     </View>
                     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                         <Text style={{ color: Colors.WHITE, fontFamily: 'Outfit-Regular', fontSize: 12 }}>{video?.VideoLikes?.length}</Text>
-                        {video?.VideoLikes?.length > 0 ? <Ionicons name="heart" size={24} color="white" /> :
-                            <Ionicons name="heart-outline" size={24} color="white" />}
+                        {video?.VideoLikes?.length > 0
+                            ? <Ionicons name="heart" size={24} color={Colors.FILlHEART} />
+                            : <Ionicons name="heart-outline" size={24} color="white" />}
                     </View>
                 </View>
                 <Image source={{ uri: video.thumbnail }} style={{ width: '100%', height: 260, borderRadius: 10 }} />

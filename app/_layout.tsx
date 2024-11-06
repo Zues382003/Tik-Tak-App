@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useFonts } from 'expo-font';
 import LoginScreen from "./(Screen)/LoginScreen";
 import { View } from "react-native";
+import { LogBox } from 'react-native';
+
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
 
@@ -41,9 +43,10 @@ const tokenCache: TokenCache = {
 }
 
 export default function RootLayout() {
+  // Tắt tất cả các cảnh báo
+  LogBox.ignoreAllLogs();
   const [isReady, setIsReady] = useState(false);
   const segments = useSegments();
-  const router = useRouter();
   const rootNavigationState = useRootNavigationState();
 
   const [loaded, error] = useFonts({

@@ -1,40 +1,57 @@
 import { View, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import ProfileIntro from './ProfileIntro'; // Import the component
-import { supabase } from '@/app/Utils/SupabaseConfig';
+import ProfileIntro from './ProfileIntro';
 import { useUser } from '@clerk/clerk-expo';
 import UserPostList from './UserPostList';
+import { PostListService } from '@/Service/PostListService';
 
 const profileScreen = () => {
     const { user } = useUser();
-    const [postList, setPostList] = useState<any[]>([]); // Explicitly type the state as an array of any
+    const [postList, setPostList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [dataUser, setDataUser] = useState([]);
 
     useEffect(() => {
-        user && getUserPosts();
-    }, [user])
-
-    const getUserPosts = async () => {
-        setIsLoading(true);
-        const { data, error } = await supabase
-            .from('PostList')
-            .select('*, Users(*), VideoLikes(postIdRef,userEmail)')
-            .eq('emailRef', user?.primaryEmailAddress?.emailAddress)
-            .order('created_at', { ascending: false });
-
-        if (data) {
-            setPostList(data as any[]); // Type assertion to any[]
+        if (user) {
+            setIsLoading(true);
+            getUserPostsFromService();
+            getDataUserFromService();
             setIsLoading(false);
-        } else {
-            setIsLoading(false);
-            console.log("error: ", error);
+        }
+    }, [user]);
+
+    const getUserPostsFromService = async () => {
+        const userEmail = user?.primaryEmailAddress?.emailAddress?.toString();
+        if (!userEmail) {
+            console.error("User email is undefined");
+            return;
+        }
+        try {
+            const userPosts = await PostListService.getUserPosts(userEmail);
+            setPostList(userPosts as any);
+        } catch (error) {
+            console.error("Error fetching user posts from service:", error);
+        }
+    };
+
+    const getDataUserFromService = async () => {
+        const userEmail = user?.primaryEmailAddress?.emailAddress?.toString();
+        if (!userEmail) {
+            console.error("User email is undefined");
+            return;
+        }
+        try {
+            const data = await PostListService.getDataUser(userEmail);
+            setDataUser(data as any);
+        } catch (error) {
+            console.error("Error fetching data user from service:", error);
         }
     }
 
     const renderItem = ({ item }: { item: any }) => {
         return (
             <View style={{ paddingHorizontal: 10 }}>
-                <UserPostList postList={postList} getLastesPosts={getUserPosts} isLoading={isLoading} />
+                <UserPostList postList={postList} getLastesPosts={getUserPostsFromService} isLoading={isLoading} />
             </View>
         );
     };
@@ -46,11 +63,11 @@ const profileScreen = () => {
             keyExtractor={(item) => item.key}
             ListHeaderComponent={
                 <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
-                    <ProfileIntro postList={postList} />
+                    <ProfileIntro postList={postList} dataUser={dataUser[0]} />
                 </View>
             }
             refreshControl={
-                <RefreshControl refreshing={isLoading} onRefresh={getUserPosts} />
+                <RefreshControl refreshing={isLoading} onRefresh={getUserPostsFromService} />
             }
         />
     )
