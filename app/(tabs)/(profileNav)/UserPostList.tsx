@@ -7,11 +7,12 @@ interface UserPostListProps {
     postList: any[];
     getLastesPosts: () => void;
     isLoading: boolean;
+    isOwner: boolean
 }
 
 
 
-const UserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPosts, isLoading }) => {
+const UserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPosts, isLoading, isOwner }) => {
 
     const screenWidth = Dimensions.get('window').width;
     const itemWidth = (screenWidth - 30) / 2; // 30 là tổng padding
@@ -21,7 +22,7 @@ const UserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPosts, i
             // Render một view trống cho item "dummy"
             return <View style={{ width: itemWidth, margin: 5 }} />
         }
-        return <VideoThumbnailItem video={item} isDisplayTrashIcon={true} OnProfileRefresh={getLastesPosts} index={index} width={itemWidth} />
+        return <VideoThumbnailItem video={item} isDisplayTrashIcon={isOwner} OnProfileRefresh={getLastesPosts} index={index} width={itemWidth} />
     }
     const keyExtractor = (item: { id: number } | null, index: number) => item ? item.id.toString() : `dummy-${index}`;
 

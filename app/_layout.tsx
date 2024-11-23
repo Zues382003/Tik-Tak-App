@@ -7,6 +7,8 @@ import { useFonts } from 'expo-font';
 import LoginScreen from "./(Screen)/LoginScreen";
 import { View } from "react-native";
 import { LogBox } from 'react-native';
+import { NativeBaseProvider } from "native-base";
+
 
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
@@ -73,17 +75,19 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoaded>
-          <SignedIn>
-            <Slot />
-          </SignedIn>
-          <SignedOut>
-            <LoginScreen />
-          </SignedOut>
-        </ClerkLoaded>
-      </ClerkProvider>
-    </View>
+    <NativeBaseProvider>
+      <View style={{ flex: 1 }}>
+        <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+          <ClerkLoaded>
+            <SignedIn>
+              <Slot />
+            </SignedIn>
+            <SignedOut>
+              <LoginScreen />
+            </SignedOut>
+          </ClerkLoaded>
+        </ClerkProvider>
+      </View>
+    </NativeBaseProvider>
   );
 }

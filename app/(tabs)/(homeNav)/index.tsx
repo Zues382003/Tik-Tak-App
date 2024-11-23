@@ -11,7 +11,7 @@ export default function HomeScreen() {
     const [loadCount, setLoadCount] = useState(0);
 
 
-    interface PostVideo {
+    type PostVideo = {
         id: number; // Sử dụng number cho id
         videoUrl: string; // Định dạng chuỗi cho videoUrl
         thumbnail: string; // Định dạng chuỗi cho thumbnail

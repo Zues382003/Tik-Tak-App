@@ -123,7 +123,6 @@ export default function NotificationScreen() {
             .range(0, 1)
             .eq('id', item.Comments.postIdRef)
 
-
         router.push({
             pathname: '/PlayVideoList',
             params: { video: JSON.stringify(data) }

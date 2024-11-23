@@ -142,7 +142,7 @@ export default function PlayVideoList() {
         }
     }, [user]);
 
-    const getLastesPosts = useCallback(async (selectedVideoId?: number) => {
+    const getLastesPosts = useCallback(async (selectedVideoId: number, email: string) => {
         setIsLoading(true);
         const userEmail = user?.primaryEmailAddress?.emailAddress?.toString();
         if (!userEmail) {
@@ -150,7 +150,7 @@ export default function PlayVideoList() {
             return;
         }
         try {
-            const data = await PostListService.getUserPosts(userEmail) as any;
+            const data = await PostListService.getUserPostsByEmail(email) as any;
 
             if (selectedVideoId) {
                 const selectedVideo = data.find((video: any) => video.id === selectedVideoId);
@@ -169,15 +169,9 @@ export default function PlayVideoList() {
     useEffect(() => {
         if (params.video) {
             const parsedVideo = JSON.parse(params.video as string);
-            if (Array.isArray(parsedVideo)) {
-                setVideoList(parsedVideo);
-                getLastesPosts();
-            } else {
-                setVideoList([parsedVideo]);
-                getLastesPosts(parsedVideo.id);
-            }
-        } else {
-            getLastesPosts();
+
+            setVideoList([parsedVideo]);
+            getLastesPosts(parsedVideo.id, parsedVideo.Users.email);
         }
     }, [params.video, getLastesPosts]);
 

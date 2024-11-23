@@ -2,7 +2,6 @@ import { View, FlatList, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router';
 import OtherUserProfileIntro from './otherUserProfileIntro';
-import { supabase } from '@/app/Utils/SupabaseConfig';
 import OtherUserPostList from './otherUserPostList';
 import { PostListService } from '@/Service/PostListService';
 
@@ -61,8 +60,8 @@ export default function OtherUserProfile() {
 
     const getUserPostsFromService = async () => {
         try {
-            const userPosts = await PostListService.getUserPosts(videoList?.Users.email);
-            setPostList(userPosts);
+            const userPosts = await PostListService.getUserPostsByEmail(videoList?.Users.email);
+            setPostList(userPosts as any);
         } catch (error) {
             console.error("Error fetching user posts from service:", error);
         }
@@ -71,7 +70,7 @@ export default function OtherUserProfile() {
     const getDataUserFromService = async () => {
         try {
             const data = await PostListService.getDataUser(videoList?.Users.email);
-            setDataUser(data);
+            setDataUser(data as any);
         } catch (error) {
             console.error("Error fetching data user from service:", error);
         }
@@ -87,12 +86,12 @@ export default function OtherUserProfile() {
 
     return (
         <FlatList
-            data={[{ key: 'profile' }]} // Dữ liệu giả để render các thành phần con
+            data={[{ key: 'profile' }]}
             renderItem={renderItem}
             keyExtractor={(item) => item.key}
             ListHeaderComponent={
                 <View style={{ paddingHorizontal: 10, paddingTop: 20 }}>
-                    <OtherUserProfileIntro postList={postList} dataUser={dataUser[0]} user={videoList?.Users} />
+                    <OtherUserProfileIntro postList={postList} dataUser={dataUser[0]} />
                 </View>
             }
             refreshControl={

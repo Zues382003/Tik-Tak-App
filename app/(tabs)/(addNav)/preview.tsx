@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 import { firebase } from '../../../Config/ConfigFireBase';
-
+import { PostListService } from '@/Service/PostListService';
 
 export default function PreviewScreen() {
     const [videoUri, setVideoUri] = useState('');
@@ -53,19 +53,8 @@ export default function PreviewScreen() {
             setUploadProgress(75);
 
             // Save data to Supabase
-            const { data, error } = await supabase
-                .from('PostList')
-                .insert([
-                    {
-                        videoUrl: videoUrl,
-                        thumbnail: thumbnailUrl,
-                        description: description,
-                        emailRef: user?.primaryEmailAddress?.emailAddress
-                    }
-                ]);
 
-            if (error) throw error;
-
+            PostListService.insertVideoPost(videoUri, thumbnailUri, description, user?.primaryEmailAddress?.emailAddress);
             setUploadProgress(100);
 
             Alert.alert('Upload Successful', 'Your content has been uploaded and saved successfully.', [

@@ -4,8 +4,7 @@ import Colors from '@/app/Utils/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ProfileIntroProps {
-    postList: any[]; // Replace 'any' with the correct type for postList
-    user: any; // Add this line, replace 'any' with the correct type for user
+    postList: any[];
     dataUser: any
 }
 
@@ -32,7 +31,7 @@ const OtherUserProfileIntro: React.FC<ProfileIntroProps> = (props) => {
                 fontFamily: 'Outfit-Bold'
             }}>Profile</Text>
             <View style={{ marginTop: 10, alignItems: 'center' }}>
-                <Image source={{ uri: props.user?.profileImage }}  // Access the first element of the array
+                <Image source={{ uri: props.dataUser?.profileImage }}  // Access the first element of the array
                     style={{
                         width: 70,
                         height: 70,
@@ -41,7 +40,7 @@ const OtherUserProfileIntro: React.FC<ProfileIntroProps> = (props) => {
                 <Text style={{
                     fontSize: 22,
                     fontFamily: 'Outfit-Medium'
-                }}>{props.user?.name}</Text>
+                }}>{props.dataUser?.name}</Text>
                 <Text style={{
                     fontSize: 17,
                     fontFamily: 'Outfit-Regular',

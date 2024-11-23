@@ -6,6 +6,7 @@ const _layout = () => {
         <Stack>
             <Stack.Screen name="Profile" options={{ headerShown: false }} />
             <Stack.Screen name="PlayVideoList" options={{ title: 'Video', presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="Friend" options={{ headerShown: false }} />
         </Stack>
     )
 }
