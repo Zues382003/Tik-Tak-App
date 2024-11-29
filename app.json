@@ -25,7 +25,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET"]
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.minhchanh38.TikTak"
     },
     "web": {
       "bundler": "metro",
@@ -44,6 +48,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a0cf7b8d-12e8-4571-956a-562fa58472db"
+      }
     }
   }
 }

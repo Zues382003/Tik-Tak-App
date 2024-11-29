@@ -97,7 +97,7 @@ export default function FriendScreen() {
                     />
                 </Box>
                 <FlatList
-
+                    removeClippedSubviews={true}
                     data={followingUsers.filter(user => user.name.toLowerCase().includes(searchQuery.toLowerCase()))}
                     renderItem={({ item }: { item: { id: number, name: string, username: string, profileImage: string, email: string, bio: string } }) =>
                         <TouchableOpacity
@@ -157,7 +157,7 @@ export default function FriendScreen() {
                     />
                 </Box>
                 <FlatList
-
+                    removeClippedSubviews={true}
                     data={followerUsers.filter(user => user.name.toLowerCase().includes(searchQuery2.toLowerCase()))}
                     renderItem={({ item }: { item: { id: number, name: string, username: string, profileImage: string, email: string, bio: string } }) =>
                         <TouchableOpacity
@@ -216,7 +216,7 @@ export default function FriendScreen() {
                     />
                 </Box>
                 <FlatList
-
+                    removeClippedSubviews={true}
                     data={friends.filter(user => user.name.toLowerCase().includes(searchQuery3.toLowerCase()))}
                     renderItem={({ item }: { item: { id: number, name: string, username: string, profileImage: string, email: string, bio: string } }) =>
                         <TouchableOpacity
@@ -317,11 +317,11 @@ export default function FriendScreen() {
 
     return (
         <KeyboardAvoidingView style={{ backgroundColor: Colors.WHITE, flex: 1 }}>
-            <ScrollView
-                style={{ marginLeft: 10, marginRight: 10, marginTop: 30 }}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo ScrollView có thể mở rộng
+            <View
+                style={{ marginLeft: 10, marginRight: 10, marginTop: 30, flex: 1 }}
+            // showsVerticalScrollIndicator={false}
+            // showsHorizontalScrollIndicator={false}
+            // contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo ScrollView có thể mở rộng
             >
                 <View
                     style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
@@ -345,7 +345,7 @@ export default function FriendScreen() {
                 </View>
 
                 <Tabs tabIndex={tabIndex} />
-            </ScrollView>
+            </View>
         </KeyboardAvoidingView>
     );
 

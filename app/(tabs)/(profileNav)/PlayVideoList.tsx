@@ -1,5 +1,5 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions, StatusBar } from 'react-native'
+import React, { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect } from 'react'
 import { router, useLocalSearchParams } from 'expo-router';
 import PlayVideoItem from '../../(Screen)/PlayVideoItem';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,18 +7,18 @@ import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 import { PostListService } from '@/Service/PostListService';
 
-export interface VideoLike {
+export type VideoLike = {
     postIdRef: number;
     userEmail: string;
 }
 
-export interface Friend {
+export type Friend = {
     id: number;
     followerEmail: string;
     followedId: number;
 }
 
-export interface VideoItem {
+export type VideoItem = {
     Users: {
         id: number;
         name: string;
@@ -34,6 +34,7 @@ export interface VideoItem {
     VideoLikes?: VideoLike[];
 }
 
+
 export default function PlayVideoList() {
     const params = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState(true);
@@ -42,6 +43,7 @@ export default function PlayVideoList() {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
     const [followedUsers, setFollowedUsers] = useState<number[]>([]);
+
 
     useEffect(() => {
         if (user) {
@@ -59,7 +61,6 @@ export default function PlayVideoList() {
                 .eq('followerEmail', user.primaryEmailAddress?.emailAddress);
 
             if (error) throw error;
-
             setFollowedUsers(data.map(item => item.followedId));
         } catch (e) {
             console.error("Error fetching followed users:", e);
@@ -142,46 +143,53 @@ export default function PlayVideoList() {
         }
     }, [user]);
 
-    const getLastesPosts = useCallback(async (selectedVideoId: number, email: string) => {
-        setIsLoading(true);
-        const userEmail = user?.primaryEmailAddress?.emailAddress?.toString();
-        if (!userEmail) {
-            console.error("User email is undefined");
-            return;
-        }
-        try {
-            const data = await PostListService.getUserPostsByEmail(email) as any;
+    const getLastesPosts = useCallback(
+        async (options: { selectedVideo?: any } = {}) => {
+            const { selectedVideo } = options;
+            setIsLoading(true);
+            if (selectedVideo) {
+                try {
+                    const { data, error } = await supabase
+                        .from('PostList')
+                        .select('*, Users(*), VideoLikes(*)')
+                        .eq('emailRef', selectedVideo[0].emailRef)
+                        .order('created_at', { ascending: false })
 
-            if (selectedVideoId) {
-                const selectedVideo = data.find((video: any) => video.id === selectedVideoId);
-                const otherVideos = data.filter((video: any) => video.id !== selectedVideoId);
-                setVideoList(selectedVideo ? [selectedVideo, ...otherVideos] : data);
-            } else {
-                setVideoList(data || []);
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        const otherVideos = data.filter((video: any) => video.id !== selectedVideo[0].id);
+                        setVideoList([selectedVideo[0], ...otherVideos]);
+
+                    } else {
+                        setVideoList(selectedVideo);
+                    }
+                } catch (e) {
+                    console.error("Error fetching videos:", e);
+                }
             }
-        } catch (e) {
-            console.error("Exception occurred:", e);
-        } finally {
             setIsLoading(false);
-        }
-    }, []);
+        },
+        [isLoading]
+    );
 
+
+    // ... existing code ...
     useEffect(() => {
         if (params.video) {
             const parsedVideo = JSON.parse(params.video as string);
-
-            setVideoList([parsedVideo]);
-            getLastesPosts(parsedVideo.id, parsedVideo.Users.email);
+            setVideoList(parsedVideo);
+            getLastesPosts({ selectedVideo: [parsedVideo] }); // Truyền isInitialLoad là true
         }
-    }, [params.video, getLastesPosts]);
+    }, [params.video]);
+    // ... existing code ...
 
-    // useEffect(() => {
-    //     console.log("Updated videoList:", videoList);
-    // }, [videoList]);
+
+    // ... existing code ...
 
     const renderItem = useCallback(({ item, index }: { item: VideoItem; index: number }) => {
-        const isFollowing = followedUsers.includes(item.Users.id);
-        const isOwnVideo = item.Users.id.toString() === user?.id;
+        const isFollowing = followedUsers.includes(item.Users?.id);
+        const isOwnVideo = item.Users.id?.toString() === user?.id?.toString(); // Kiểm tra user?.id
 
         return (
             <PlayVideoItem
@@ -198,15 +206,19 @@ export default function PlayVideoList() {
         );
     }, [currentVideoIndex, userLikeHandler, userFollowHandler, isLoading, user, followedUsers]);
 
-    const keyExtractor = useCallback((item: VideoItem) => item.id.toString(), []);
+    // ... existing code ...
+
+    const keyExtractor = useCallback((item: VideoItem) => {
+        return item.id?.toString() || ''; // Kiểm tra item.id
+    }, []);
 
     const memoizedFlatList = useMemo(() => (
         <FlatList
             ref={flatListRef}
-            style={{ flex: 1, width: '100%', height: '100%' }}
+            style={{ flex: 1 }}
             data={videoList}
             pagingEnabled
-            horizontal
+            horizontal={false} // Ensure this is set to false for vertical scrolling
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             initialScrollIndex={0}
@@ -217,12 +229,18 @@ export default function PlayVideoList() {
                 });
             }}
             onScroll={e => {
-                const contentOffsetX = e.nativeEvent.contentOffset.x;
-                const index = Math.round(contentOffsetX / e.nativeEvent.layoutMeasurement.width);
+                const contentOffsetY = e.nativeEvent.contentOffset.y;
+                const index = Math.round(contentOffsetY / e.nativeEvent.layoutMeasurement.height);
+                console.log("index: ", index)
                 setCurrentVideoIndex(index);
             }}
+            onEndReached={() => getLastesPosts()}
+            onEndReachedThreshold={0.2}
+            removeClippedSubviews={true}
         />
     ), [videoList, keyExtractor, renderItem]);
+
+    // ... existing code ...
 
     return (
         <View style={{ flex: 1 }}>

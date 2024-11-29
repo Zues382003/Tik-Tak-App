@@ -1,5 +1,4 @@
 import { View, FlatList, StyleSheet, Dimensions } from 'react-native'
-import React from 'react'
 import VideoThumbnailItem from '@/app/(Screen)/VideoThumbnailItem';
 
 // Định nghĩa kiểu props
@@ -16,6 +15,8 @@ const UserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPosts, i
 
     const screenWidth = Dimensions.get('window').width;
     const itemWidth = (screenWidth - 30) / 2; // 30 là tổng padding
+
+
 
     const renderItem = ({ item, index }: { item: any, index: any }) => {
         if (item === null) {
@@ -36,6 +37,8 @@ const UserPostList: React.FC<UserPostListProps> = ({ postList, getLastesPosts, i
                 onRefresh={() => getLastesPosts()}
                 refreshing={isLoading}
                 keyExtractor={keyExtractor} // Thêm keyExtractor để tránh cảnh báo
+                contentContainerStyle={{ flexGrow: 1 }} // Ensure the content can grow
+                removeClippedSubviews={true}
             />
         </View>
     )

@@ -235,6 +235,7 @@ const ProfileComponent = (props: profileComponent) => {
                     style={{ flex: 1 }}
                     data={[{ key: 'profile' }]}
                     keyExtractor={(item) => item.key}
+                    removeClippedSubviews={true} //React Native sẽ tự động loại bỏ các thành phần con (subviews) không nằm trong vùng nhìn thấy (viewport) của danh sách.
                     ListHeaderComponent={
                         <View style={{ paddingHorizontal: 10, paddingBottom: 10, flex: 1 }}>
                             <ProfileIntro

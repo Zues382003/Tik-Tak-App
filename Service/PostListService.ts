@@ -17,10 +17,28 @@ const getUserPosts = async () => {
     }
 };
 
+const getUserPostById = async (id: number) => {
+    try {
+        const { data, error } = await supabase
+            .from('PostList')
+            .select('*, Users(*), VideoLikes(*)')
+            .eq('id',id)
+            
+
+        if (error) {
+            console.error("Error fetching user posts:", error);
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Unexpected error:", error);
+    }
+};
+
 const getListVideoByEmail = async(email: string)=>{
     const { data, error } = await supabase
                 .from('PostList')
-                .select('*, Users(username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
+                .select('*, Users(id, username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
                 .order('created_at', { ascending: false })
                 .eq('emailRef', email)
 
@@ -104,7 +122,7 @@ const getListVideoLikedByEmail = async (userEmail: string) => {
         // Step 3: Fetch the video details from PostList based on the liked video IDs
         const { data: videos, error: videoError } = await supabase
             .from('PostList')
-            .select('*, Users(username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
+            .select('*, Users(id, username, name, profileImage, email), VideoLikes(postIdRef, userEmail)')
             .in('id', likedVideoIds) // Use the array of IDs to filter
             .order('created_at', { ascending: false });
 
@@ -120,5 +138,5 @@ const getListVideoLikedByEmail = async (userEmail: string) => {
         return [];
     }
 }
-const PostListService = { getUserPosts, getDataUser, getUserPostsByEmail, insertVideoPost, getListVideoByEmail, getListVideoLikedByEmail };
+const PostListService = { getUserPosts, getDataUser, getUserPostsByEmail, insertVideoPost, getListVideoByEmail, getListVideoLikedByEmail, getUserPostById };
 export { PostListService };

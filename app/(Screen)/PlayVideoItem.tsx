@@ -1,4 +1,4 @@
-import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableOpacity, FlatList, Modal, TextInput, TouchableWithoutFeedback } from 'react-native'
+import { View, StyleSheet, ActivityIndicator, useWindowDimensions, SafeAreaView, Image, Text, TouchableOpacity, FlatList, Modal, TextInput, TouchableWithoutFeedback, StatusBar } from 'react-native'
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { ResizeMode, Video } from 'expo-av';
 import Colors from '../Utils/Colors';
@@ -74,13 +74,22 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
         }
     }, [status]);
 
-    const onOtherUserProfile = () => {
+    // const onOtherUserProfile = () => {
+    //     router.push({
+    //         pathname: '/otherUserProfile', // Corrected pathname
+    //         params: {
+    //             video: JSON.stringify(props.video) // Convert video object to a JSON string
+    //         }
+    //     })
+    // }
+
+    const onOtherUserProfile = async (user: any) => {
         router.push({
-            pathname: '/otherUserProfile', // Corrected pathname
+            pathname: '/(tabs)/(profileNav)/Profile',
             params: {
-                video: JSON.stringify(props.video) // Convert video object to a JSON string
+                user: JSON.stringify(user),
             }
-        })
+        });
     }
 
     useEffect(() => {
@@ -246,9 +255,12 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
         return props.user?.primaryEmailAddress?.emailAddress !== props.video.emailRef;
     }, [props.user?.primaryEmailAddress?.emailAddress, props.video.emailRef]);
 
+    const statusBarHeight = StatusBar.currentHeight || 0; // Chiều cao của status bar
+    const remainingHeight = windowHeight - statusBarHeight - 25; // Tính chiều cao còn lại
+
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={[styles.container, { width: windowWidth }]}>
+            <View style={[styles.container, { width: windowWidth, height: remainingHeight }]}>
                 {props.isLoading && (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#0000ff" />
@@ -257,7 +269,7 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                 <View style={styles.overlay}>
                     <View style={styles.mainContent}>
                         <View style={styles.userInfo}>
-                            <TouchableOpacity onPress={onOtherUserProfile}>
+                            <TouchableOpacity onPress={() => onOtherUserProfile(props.video.Users)}>
                                 <Image
                                     source={{ uri: props.video.Users?.profileImage }}
                                     style={[styles.avatar, styles.avatarShadow]}
