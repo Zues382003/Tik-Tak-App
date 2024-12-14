@@ -4,7 +4,7 @@
     "slug": "TikTak",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/LogoTikTak.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/LogoTikTak.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [

@@ -304,9 +304,6 @@ function PlayVideoItem(props: Readonly<PlayVideoItemProps>) {
                             <Ionicons name="chatbubble-outline" size={35} color={Colors.WHITE} style={styles.icon} />
                             <Text style={styles.commentCount}>{comments.length}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <Ionicons name="paper-plane-outline" size={35} color={Colors.WHITE} style={styles.icon} />
-                        </TouchableOpacity>
                     </View>
                 </View>
                 <Video
@@ -548,6 +545,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         flex: 1,
         gap: 5,
+        marginBottom: 10
     },
     actionButton: {
         marginBottom: 15,

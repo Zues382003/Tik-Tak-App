@@ -323,25 +323,20 @@ export default function FriendScreen() {
             // showsHorizontalScrollIndicator={false}
             // contentContainerStyle={{ flexGrow: 1 }} // Đảm bảo ScrollView có thể mở rộng
             >
-                <View
-                    style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+                <TouchableOpacity
+                    style={{ position: 'absolute', left: 0, top: 0 }}
+                    onPress={() => router.back()}
                 >
-                    <TouchableOpacity
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                        onPress={() => router.back()}
-                    >
-                        <AntDesign name="arrowleft" size={28} color="black" />
-                    </TouchableOpacity>
+                    <AntDesign name="arrowleft" size={28} color="black" />
+                </TouchableOpacity>
+                <View
+                    style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', marginBottom: 10 }}
+                >
                     <Text
                         style={{ fontFamily: 'Outfit-Medium', fontSize: 18 }}
                     >
                         {dataUser?.username}
                     </Text>
-                    <TouchableOpacity
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                        <AntDesign name="adduser" size={28} color="black" />
-                    </TouchableOpacity>
                 </View>
 
                 <Tabs tabIndex={tabIndex} />

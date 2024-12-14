@@ -134,9 +134,9 @@ export default function NotificationScreen() {
         <View style={{ padding: 20, flex: 1 }}>
             <View style={{ display: 'flex', justifyContent: 'center', flexDirection: 'row', paddingTop: 10, marginBottom: 20 }}>
                 <Text style={{ fontSize: 26, fontFamily: 'Outfit-Bold' }}>Notification</Text>
-                <TouchableOpacity style={{ position: 'absolute', right: 0, top: 12 }}>
+                <View style={{ position: 'absolute', right: 0, top: 12 }}>
                     <AntDesign name="setting" size={32} color={Colors.BLACK} />
-                </TouchableOpacity>
+                </View>
             </View>
             <FlatList
                 showsVerticalScrollIndicator={false}

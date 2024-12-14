@@ -163,14 +163,6 @@ export default function TabLayout() {
                     }}
                 />
                 <Tabs.Screen
-                    name="(inboxNav)"
-                    options={{
-                        title: 'Inbox',
-                        headerShown: false,
-                        tabBarIcon: ({ color, size }) => <AntDesign name="message1" size={size} color={color} />,
-                    }}
-                />
-                <Tabs.Screen
                     name="(profileNav)"
                     options={{
                         title: 'Profile',
