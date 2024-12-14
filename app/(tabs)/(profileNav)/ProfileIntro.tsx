@@ -66,6 +66,15 @@ const ProfileIntro: React.FC<ProfileIntroProps> = (props) => {
         });
     }
 
+    const handleOpenEditProfile = () => {
+        router.push({
+            pathname: '/(tabs)/(profileNav)/EditProfile',
+            params: {
+                dataUser: JSON.stringify(props.dataUser),
+            }
+        });
+    }
+
 
     const handleSignOut = async () => {
         await signOut(); // Đăng xuất
@@ -124,16 +133,17 @@ const ProfileIntro: React.FC<ProfileIntroProps> = (props) => {
                     </Button>
                 )}
             </View>
-            <View style={{ marginTop: 10, alignItems: 'center' }}>
+            <View style={{ marginHorizontal: 10, alignItems: 'center' }}>
                 <Image source={{ uri: props.dataUser?.profileImage }}
                     style={{
-                        width: 70,
-                        height: 70,
+                        width: 100,
+                        height: 100,
                         borderRadius: 99,
                     }} />
                 <Text style={{
                     fontSize: 22,
-                    fontFamily: 'Outfit-Medium'
+                    fontFamily: 'Outfit-Medium',
+                    marginTop: 10
                 }}>{props.dataUser?.name}</Text>
                 <Text style={{
                     marginTop: -5,
@@ -228,6 +238,7 @@ const ProfileIntro: React.FC<ProfileIntroProps> = (props) => {
                 <Button
                     style={{ width: 140 }}
                     size="sm"
+                    onPress={handleOpenEditProfile}
                     variant="outline"
                     _text={{ fontSize: 18, color: 'black', fontFamily: 'Outfit-Bold' }}
                     _pressed={{

@@ -231,7 +231,6 @@ export default function PlayVideoList() {
             onScroll={e => {
                 const contentOffsetY = e.nativeEvent.contentOffset.y;
                 const index = Math.round(contentOffsetY / e.nativeEvent.layoutMeasurement.height);
-                console.log("index: ", index)
                 setCurrentVideoIndex(index);
             }}
             onEndReached={() => getLastesPosts()}

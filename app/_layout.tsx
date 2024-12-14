@@ -1,13 +1,12 @@
 import { SignedIn, SignedOut, ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
-import { Slot, useRouter, useSegments, useRootNavigationState } from 'expo-router';
+import { Slot, useSegments, useRootNavigationState } from 'expo-router';
 import * as SecureStore from 'expo-secure-store'
-import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from "react";
 import { useFonts } from 'expo-font';
 import LoginScreen from "./(Screen)/LoginScreen";
-import { View } from "react-native";
-import { LogBox } from 'react-native';
+import { LogBox, View } from 'react-native';
 import { NativeBaseProvider } from "native-base";
+import SplashScreen from "./(Screen)/SplashScreen";
 
 
 
@@ -47,7 +46,7 @@ const tokenCache: TokenCache = {
 export default function RootLayout() {
   // Tắt tất cả các cảnh báo
   LogBox.ignoreAllLogs();
-  const [isReady, setIsReady] = useState(false);
+  const [loading, setLoading] = useState(true);
   const segments = useSegments();
   const rootNavigationState = useRootNavigationState();
 
@@ -59,7 +58,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded || error) {
-      SplashScreen.hideAsync().then(() => setIsReady(true));
+      setTimeout(() => {
+        setLoading(false);
+      }, 3000)
     }
   }, [loaded, error]);
 
@@ -70,24 +71,24 @@ export default function RootLayout() {
     // Add navigation logic if needed
   }, [rootNavigationState?.key, segments]);
 
-  if (!isReady) {
-    return null;
-  }
-
   return (
     <NativeBaseProvider>
-      <View style={{ flex: 1 }}>
-        <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-          <ClerkLoaded>
-            <SignedIn>
-              <Slot />
-            </SignedIn>
-            <SignedOut>
-              <LoginScreen />
-            </SignedOut>
-          </ClerkLoaded>
-        </ClerkProvider>
-      </View>
+      {
+        loading ? <SplashScreen /> :
+          <View style={{ flex: 1 }}>
+            <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+              <ClerkLoaded>
+                <SignedIn>
+                  <Slot />
+                </SignedIn>
+                <SignedOut>
+                  <LoginScreen />
+                </SignedOut>
+              </ClerkLoaded>
+            </ClerkProvider>
+          </View>
+
+      }
     </NativeBaseProvider>
   );
 }

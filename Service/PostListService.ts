@@ -72,7 +72,7 @@ const getDataUser = async (userEmail: string) => {
     try{
         const { data, error } = await supabase
         .from('Users')
-        .select('id,name,email,username,profileImage,bio')
+        .select('id,name,email,username,profileImage,bio,facebook,youtube')
         .eq('email', userEmail);
 
         if (error) {

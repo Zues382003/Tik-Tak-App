@@ -87,7 +87,6 @@ export default function HomeScreen() {
         <View style={{ padding: 5, paddingTop: 30, flex: 1 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10, marginBottom: 10 }}>
                 <Text style={{ fontSize: 30, fontFamily: 'Outfit-Bold' }}>Tik Tak</Text>
-                <Image source={{ uri: dataUser[0]?.profileImage }} style={{ width: 50, height: 50, borderRadius: 99 }} />
             </View>
             <View style={{ flex: 1 }}>
                 {isLoading && videoList.length === 0 ? ( // Hiển thị loader khi không có dữ liệu

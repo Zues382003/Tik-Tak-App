@@ -65,7 +65,7 @@ export default function LoginScreen() {
             // Delay navigation
             setTimeout(() => {
                 router.replace('/(tabs)');
-            }, 1000);
+            }, 2000);
         }
     }, [sessionId, router, isMounted]);
 

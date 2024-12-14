@@ -5,7 +5,6 @@ import Colors from '@/app/Utils/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as FileSystem from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/app/Utils/SupabaseConfig';
 import { useUser } from '@clerk/clerk-expo';
 import { firebase } from '../../../Config/ConfigFireBase';
 import { PostListService } from '@/Service/PostListService';
